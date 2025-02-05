@@ -19,7 +19,7 @@ export class Star extends THREE.Mesh{
     const [x,y,z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100))
     this.position.set(x,y,z)
     scene.add(this)
-  }
+  }   
 
 }
 
