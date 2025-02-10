@@ -19,7 +19,7 @@ const framesPerSecond = 60
 // const secondsPerHour = 3600
 // const hourlyRotation = (2 * Math.PI) / (secondsPerHour * framesPerSecond)
 
-const second = 1 
+const second = 1
 const minute = second * 60
 const hour = minute * 60
 const day = hour * 24 
@@ -75,10 +75,12 @@ container.add(camera)
     const planetOrbitIncrement = (2 * Math.PI / year) * deltaTime
     const moonOrbitIncrement = (2 * Math.PI / (day * 27.3)) * deltaTime
     const planetRotationIncrement = (2 * Math.PI / day) * deltaTime
+    const moonRotationIncrement = (2 * Math.PI /  (day * 27.3)) * deltaTime
 
   planet.toOrbit(star,AU,planetOrbitIncrement,true)
   moon.toOrbit(planet,AU * 0.002499,moonOrbitIncrement,true)
   planet.rotate(planetRotationIncrement)
+  moon.rotate(moonRotationIncrement)
   
   container.position.copy(cameraParent.position)
   

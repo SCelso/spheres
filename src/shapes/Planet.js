@@ -32,7 +32,8 @@ export class Planet extends THREE.Mesh{
     this.rotateAngle += angleIncrement
     this.rotateAngle %= 2 * Math.PI;
     
-    this.rotateY(this.rotateAngle)
+    this.rotation.y = this.rotateAngle
+    
     
 
   }
