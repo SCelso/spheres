@@ -2,9 +2,15 @@ import * as THREE from 'three'
 
 export class Planet extends THREE.Mesh{
 
+  orbitalPeriod =0
+  sideralDay =0
   translationAngle = 0
   rotateAngle = 0
   orbit = []
+  orbited = undefined
+  distanceToOrbited = 0
+  translateCounterClockWise = false
+  rotateCounterClockWise = false
   lineOrbit =  new THREE.Line( new THREE.BufferGeometry().setFromPoints( this.orbit ), new THREE.LineBasicMaterial({
         color:0xffffff
       }));
@@ -12,23 +18,54 @@ export class Planet extends THREE.Mesh{
 
   firstOrbit = false
 
-  constructor(radius,widthSegments,heightSegments){
-   
-    const geometry = new THREE.SphereGeometry(radius,widthSegments,heightSegments)
+  constructor({radius,widthSegments,heightSegments,sideralDay=0,orbitalPeriod=0,orbited= undefined,distanceToOrbited=0,translateCounterClockWise= false,rotateCounterClockWise= false}){
     const material =  new THREE.MeshStandardMaterial({color: 0xffffff}) 
-    
+    const geometry = new THREE.SphereGeometry(radius,widthSegments,heightSegments)
     super(geometry,material)
-
+    
+    this.sideralDay = sideralDay
+    this.orbitalPeriod= orbitalPeriod
+    this.orbited = orbited
+    this.distanceToOrbited=distanceToOrbited
+    this.translateCounterClockWise = translateCounterClockWise
+    this.rotateCounterClockWise = rotateCounterClockWise
     
     
   } 
+  getTranslateCounterClockWise(){
+    return this.translateCounterClockWise
+  }
+  getRotateCounterClockWise(){
+    return this.rotateCounterClockWise
+  }
+  getSideralDay(){
+    return this.sideralDay
+  }
+  getDistanceToOrbited(){
+    return this.distanceToOrbited
+  }
   
-  
-  setAngle(newAngle){
-    this.angle= newAngle
+  getOrbited(){
+    return this.orbited
   }
 
-  rotate(angleIncrement){
+
+  getOrbitalPeriod(){
+    return this.orbitalPeriod
+  }
+  
+  setAngle(newAngle){
+    this.angle = newAngle
+  }
+
+  rotate(angleIncrement,counterClockWise = false){
+
+    if (counterClockWise) {
+      this.rotateAngle -= angleIncrement
+  } else {
+      this.rotateAngle += angleIncrement
+  }
+
     this.rotateAngle += angleIncrement
     this.rotateAngle %= 2 * Math.PI;
     
@@ -53,9 +90,9 @@ export class Planet extends THREE.Mesh{
     
     
     this.orbit.push(new THREE.Vector3(this.position.x,this.position.y,this.position.z))
+   
     if(Math.abs(this.translationAngle) < angleIncrement){
       console.log("orbita completa");
-      
       
       this.firstOrbit = true
     }
@@ -85,9 +122,15 @@ export class Planet extends THREE.Mesh{
       }
 
 
-      loadTexture(texture){
-        this.material = new THREE.MeshStandardMaterial({
-            map: texture
+      loadTexture({map=null,bumpMap=null,bumpScale=1,roughnessMap=null,alphaMap=null,transparent=false}){
+        this.material = new THREE.MeshPhysicalMaterial({
+            map,
+            bumpMap,
+            bumpScale,
+            roughnessMap,
+            alphaMap,
+            transparent,
+          
           })
       }
 }

@@ -2,6 +2,7 @@ import * as THREE from 'three'
 
 export class Container extends THREE.Mesh {
 
+  currentTarget = undefined
 
   constructor(radius){
 
@@ -12,6 +13,15 @@ export class Container extends THREE.Mesh {
         
     super(geometry,material)
   }
+
+  setCurrentTarget(currentTarget){
+    this.currentTarget = currentTarget
+  }
+
+  getCurrentTarget(){
+    return this.currentTarget
+  }
+
 
 
 }

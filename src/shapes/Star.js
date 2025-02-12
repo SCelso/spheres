@@ -21,5 +21,25 @@ export class Star extends THREE.Mesh{
     scene.add(this)
   }   
 
+  loadTexture({emissiveMap=null,bumpMap=null,bumpScale=1,roughnessMap=null,transparent=false,alphaMap=null}){
+
+          
+          
+        this.material= new THREE.MeshPhysicalMaterial({
+              emissiveMap,
+              emissive:new THREE.Color(0xff8000),
+              emissiveIntensity:1,
+              bumpMap,
+              bumpScale,
+              roughnessMap,
+              transparent,
+              alphaMap,
+            
+            })
+
+            
+            
+        }
+
 }
 
