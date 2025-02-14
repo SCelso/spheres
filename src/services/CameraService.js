@@ -1,49 +1,37 @@
-import * as THREE from 'three'
-import { GeometryService } from './GeometryService'
+import * as THREE from "three";
+import { GeometryService } from "./GeometryService";
 
+export class CameraService {
+  static instance;
 
-export class CameraService{
+  geometryService;
 
-  static instance 
-
-  geometryService
-
-  constructor(){
-
-     this.geometryService = GeometryService.getInstance()
+  constructor() {
+    this.geometryService = GeometryService.getInstance();
   }
 
-
-  static getInstance(){
-    if(!CameraService.instance){
-      CameraService.instance = new CameraService()
-
+  static getInstance() {
+    if (!CameraService.instance) {
+      CameraService.instance = new CameraService();
     }
-    return CameraService.instance
+    return CameraService.instance;
   }
 
-  createPerspectiveCamera({fov,aspect,near,  far}){
-    const camera=  new THREE.PerspectiveCamera( fov, aspect, near , far );
-    return camera
+  createPerspectiveCamera({ fov, aspect, near, far }) {
+    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    return camera;
   }
-  
 
-  changeCamera(container ,planets){
-    let cameraTarget = planets[0]
+  changeCamera(container, planets) {
+    planets.push(planets[0]);
+    planets.shift();
 
-    const size = this.geometryService.getObjectSize(cameraTarget)
-    console.log(size);
-    this.geometryService.updateBoxSize(container,size.x, size.y, size.z)
+    container.setCurrentTarget(planets[0]);
 
-    container.position.copy(cameraTarget.position)
-    
-    
-    container.setCurrentTarget(cameraTarget)
-    planets.push(cameraTarget)
-    planets.shift()
-
-   
-    
-    
-    }
+    const size = this.geometryService.getObjectSize(
+      container.getCurrentTarget()
+    );
+    this.geometryService.updateBoxSize(container, size.x, size.y, size.z);
+    container.position.copy(planets[0].position);
+  }
 }

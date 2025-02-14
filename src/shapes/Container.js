@@ -1,27 +1,25 @@
-import * as THREE from 'three'
+import * as THREE from "three";
 
 export class Container extends THREE.Mesh {
+  currentTarget = undefined;
 
-  currentTarget = undefined
+  constructor(radius) {
+    const size = radius * 2;
 
-  constructor(radius){
+    const geometry = new THREE.BoxGeometry(size, size, size);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+    });
 
-    const size = radius *  2
-
-     const geometry = new THREE.BoxGeometry(size,size,size)
-     const material =  new THREE.MeshBasicMaterial({color: 0xffffff,wireframe: true}) 
-        
-    super(geometry,material)
+    super(geometry, material);
   }
 
-  setCurrentTarget(currentTarget){
-    this.currentTarget = currentTarget
+  setCurrentTarget(currentTarget) {
+    this.currentTarget = currentTarget;
   }
 
-  getCurrentTarget(){
-    return this.currentTarget
+  getCurrentTarget() {
+    return this.currentTarget;
   }
-
-
-
 }
