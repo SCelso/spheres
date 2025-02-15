@@ -1,4 +1,4 @@
-export const SECOND = 0.00001;
+export const SECOND = 1;
 export const MINUTE = SECOND * 60;
 export const HOUR = MINUTE * 60;
 export const DAY = HOUR * 23.934469;
@@ -174,6 +174,15 @@ export const NEPTUNE = {
   translateCounterClockWise: true,
   rotateCounterClockWise: true,
   isPlanet: true,
+  canBeFocused: true,
+};
+
+export const SUN = {
+  name: "sun",
+  radius: SUN_SIZE,
+  widthSegments: 32,
+  heightSegments: 32,
+  isPlanet: false,
   canBeFocused: true,
 };
 

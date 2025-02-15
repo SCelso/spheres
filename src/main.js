@@ -16,6 +16,10 @@ import { TexturesService } from "./services/TexturesService.js";
 import Stats from "stats.js";
 import { PlanetWorkerService } from "./services/PlanetWorkerService.js";
 
+var stats = new Stats();
+stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom);
+
 const cameraService = CameraService.getInstance();
 const texturesService = TexturesService.getInstance();
 
@@ -25,9 +29,7 @@ const camera = cameraService.createPerspectiveCamera({
   near: 0.001,
   far: 100000,
 });
-
 const controls = new OrbitControls(camera, renderer.domElement);
-
 //OBJECTS
 const container = new Container(Constants.EARTH_SIZE);
 const allMeshesJSON = initializeAllMeshes(Constants.MESHES_DEFINITION);
@@ -102,16 +104,10 @@ function createMeshesWithTexturesJSON(allMeshes) {
   });
 }
 function initializeAllMeshes(meshesDefinition) {
-  const sun = new Star({
-    name: "sun",
-    radius: Constants.SUN_SIZE,
-    widthSegments: 32,
-    heightSegments: 32,
-    isPlanet: false,
-    canBeFocused: true,
-  });
+  const sun = new Star(Constants.SUN);
 
-  const allMeshes = { sun };
+  const allMeshes = {};
+  allMeshes[sun.name] = sun;
 
   meshesDefinition.forEach((planet) => {
     const planetMesh = new Planet(planet);
@@ -128,6 +124,7 @@ function initializeAllMeshes(meshesDefinition) {
 }
 
 function animate(currentTime) {
+  stats.begin();
   const deltaTime = Calculations.calculateDeltaTime(currentTime, previousTime); // Tiempo en segundos
   previousTime = currentTime;
 
@@ -139,5 +136,6 @@ function animate(currentTime) {
   camera.lookAt(container.position);
 
   renderer.render(scene, camera);
+  stats.end();
   requestAnimationFrame(animate);
 }

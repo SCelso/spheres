@@ -1,34 +1,25 @@
 export class PlanetWorkerService {
   constructor(planets) {
     this.planets = planets;
-    this.workers = new Map();
+    this.worker = new Worker("src/worker.js");
 
-    planets.forEach((planet, id) => {
-      const worker = new Worker("src/worker.js");
-      worker.onmessage = (e) => this.handleUpdate(id, e.data);
-      this.workers.set(id, worker);
-    });
-  }
-
-  handleUpdate(planetId, data) {
-    const planet = this.planets[planetId];
-    if (!planet) return;
-
-    // Actualizar ambos parámetros
-    planet.translationAngle = data.newTranslationAngle;
-    planet.rotation.y = data.newRotationAngle;
-    planet.position.set(data.newX, 0, data.newZ);
+    this.worker.onmessage = (e) => {
+      e.data.forEach((update) => {
+        const planet = this.planets.find((p) => p.id === update.id);
+        if (planet) {
+          planet.position.set(update.newX, 0, update.newZ);
+          planet.rotation.y = update.newRotationAngle;
+          planet.translationAngle = update.newTranslationAngle;
+        }
+      });
+    };
   }
 
   update(deltaTime) {
-    this.planets.forEach((planet, id) => {
+    const planetsData = this.planets.map((planet) => {
       const orbited = planet.getOrbited();
-
-      if (!orbited) {
-        console.error("No hay cuerpo orbitado para:", planet.name);
-        return;
-      }
-      this.workers.get(id).postMessage({
+      return {
+        id: planet.id,
         deltaTime,
         orbitalPeriod: planet.getOrbitalPeriod(),
         sideralDay: planet.getSideralDay(),
@@ -37,14 +28,15 @@ export class PlanetWorkerService {
         distanceToOrbited: planet.getDistanceToOrbited(),
         translateCCW: planet.getTranslateCounterClockWise(),
         rotateCCW: planet.getRotateCounterClockWise(),
-        orbitedX: orbited.position.x,
-        orbitedZ: orbited.position.z,
-      });
+        orbitedX: orbited?.position.x || 0,
+        orbitedZ: orbited?.position.z || 0,
+      };
     });
+
+    this.worker.postMessage(planetsData);
   }
 
   dispose() {
-    this.workers.forEach((worker) => worker.terminate());
-    this.workers.clear();
+    this.worker.terminate();
   }
 }

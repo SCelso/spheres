@@ -1,36 +1,48 @@
 self.onmessage = (e) => {
-  const {
-    deltaTime,
-    orbitalPeriod,
-    sideralDay,
-    translationAngle,
-    rotationAngle,
-    distanceToOrbited,
-    translateCCW,
-    rotateCCW,
-    orbitedX,
-    orbitedZ,
-  } = e.data;
+  const planetsData = e.data;
+  const updates = [];
 
-  const translationIncrement = (2 * Math.PI * deltaTime) / orbitalPeriod;
-  let newTranslationAngle = translateCCW
-    ? translationAngle - translationIncrement
-    : translationAngle + translationIncrement;
-  newTranslationAngle %= 2 * Math.PI;
+  for (const planetData of planetsData) {
+    const {
+      id,
+      deltaTime,
+      orbitalPeriod,
+      sideralDay,
+      translationAngle,
+      rotationAngle,
+      distanceToOrbited,
+      translateCCW,
+      rotateCCW,
+      orbitedX,
+      orbitedZ,
+    } = planetData;
 
-  const rotationIncrement = (2 * Math.PI * deltaTime) / sideralDay;
-  let newRotationAngle = rotateCCW
-    ? rotationAngle - rotationIncrement
-    : rotationAngle + rotationIncrement;
-  newRotationAngle %= 2 * Math.PI;
+    // Cálculo movimiento orbital
+    const translationIncrement = (2 * Math.PI * deltaTime) / orbitalPeriod;
+    let newTranslationAngle = translateCCW
+      ? translationAngle - translationIncrement
+      : translationAngle + translationIncrement;
+    newTranslationAngle = newTranslationAngle % (2 * Math.PI);
 
-  let newX = orbitedX + Math.cos(newTranslationAngle) * distanceToOrbited;
-  let newZ = orbitedZ + Math.sin(newTranslationAngle) * distanceToOrbited;
+    // Cálculo rotación
+    const rotationIncrement = (2 * Math.PI * deltaTime) / sideralDay;
+    let newRotationAngle = rotateCCW
+      ? rotationAngle - rotationIncrement
+      : rotationAngle + rotationIncrement;
+    newRotationAngle = newRotationAngle % (2 * Math.PI);
 
-  self.postMessage({
-    newTranslationAngle,
-    newRotationAngle,
-    newX,
-    newZ,
-  });
+    // Nueva posición
+    const newX = orbitedX + Math.cos(newTranslationAngle) * distanceToOrbited;
+    const newZ = orbitedZ + Math.sin(newTranslationAngle) * distanceToOrbited;
+
+    updates.push({
+      id,
+      newTranslationAngle,
+      newRotationAngle,
+      newX,
+      newZ,
+    });
+  }
+
+  self.postMessage(updates);
 };

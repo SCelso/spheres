@@ -11,8 +11,6 @@ export class Body extends THREE.Mesh {
   translateCounterClockWise = false;
   rotateCounterClockWise = false;
   canBeFocused = false;
-  worker = undefined;
-  planetId = undefined;
 
   constructor({
     name,
@@ -46,6 +44,13 @@ export class Body extends THREE.Mesh {
   getTranslateCounterClockWise() {
     return this.translateCounterClockWise;
   }
+  getTranslationAngle() {
+    return this.translationAngle;
+  }
+  setTranslationAngle(translationAngle) {
+    this.translationAngle = translationAngle;
+  }
+
   getRotateCounterClockWise() {
     return this.rotateCounterClockWise;
   }
