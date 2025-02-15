@@ -1,14 +1,12 @@
 import * as THREE from "three";
+import { Body } from "./Body";
 
-export class Star extends THREE.Mesh {
-  isPlanet = false;
-  canBeFocused = false;
+export class Star extends Body {
   constructor({
     name,
     radius,
     widthSegments,
     heightSegments,
-    isPlanet = false,
     canBeFocused = false,
   }) {
     const geometry = new THREE.SphereGeometry(
@@ -16,16 +14,14 @@ export class Star extends THREE.Mesh {
       widthSegments,
       heightSegments
     );
+
     const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
 
     material.emissive = new THREE.Color(0xff8000);
     material.emissiveIntensity = 1;
     material.blendAlpha = 100;
 
-    super(geometry, material);
-    this.name = name;
-    this.isPlanet = isPlanet;
-    this.canBeFocused = canBeFocused;
+    super({ radius, name, canBeFocused, geometry, material });
   }
 
   addStar(scene) {

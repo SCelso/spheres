@@ -33,14 +33,13 @@ const container = new Container(Constants.EARTH_SIZE);
 const allMeshesJSON = initializeAllMeshes(Constants.MESHES_DEFINITION);
 
 const allMeshes = Object.values(allMeshesJSON);
-const planets = allMeshes.filter((mesh) => mesh.isPlanet);
+const planets = allMeshes.filter((mesh) => mesh instanceof Planet);
+
 const earthClouds = allMeshes.filter((mesh) => mesh.name === "earthClouds")[0];
 const earth = allMeshes.filter((mesh) => mesh.name === "earth")[0];
 
 const bodiesWithWorkers = [...planets, earthClouds];
-planets.forEach((planet) => {
-  scene.add(planet.lineOrbit);
-});
+
 const planetWorkerService = new PlanetWorkerService(bodiesWithWorkers);
 
 const cameraTargets = allMeshes.filter((mesh) => mesh.canBeFocused);
