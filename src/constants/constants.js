@@ -1,4 +1,4 @@
-export const SECOND = 1;
+export const SECOND = 0.00001;
 export const MINUTE = SECOND * 60;
 export const HOUR = MINUTE * 60;
 export const DAY = HOUR * 23.934469;
@@ -198,3 +198,5 @@ export const MESHES_DEFINITION = [
   MOON,
   EARTH_CLOUDS,
 ];
+
+export const TARGET_CAM_DISTANCE = 3;

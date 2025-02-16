@@ -27,7 +27,6 @@ export class CameraService {
   changeCamera(container, planets) {
     planets.push(planets[0]);
     planets.shift();
-
     container.setCurrentTarget(planets[0]);
 
     const size = this.geometryService.getObjectSize(

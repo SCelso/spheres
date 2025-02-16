@@ -13,6 +13,7 @@ export class Container extends THREE.Mesh {
     });
 
     super(geometry, material);
+    this.visible = false;
   }
 
   setCurrentTarget(currentTarget) {

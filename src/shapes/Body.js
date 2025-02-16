@@ -33,6 +33,7 @@ export class Body extends THREE.Mesh {
       new THREE.SphereGeometry(radius, widthSegments, heightSegments);
     super(geometry, material);
     this.name = name;
+    this.radius = radius;
     this.sideralDay = sideralDay;
     this.orbitalPeriod = orbitalPeriod;
     this.orbited = orbited;
@@ -74,5 +75,9 @@ export class Body extends THREE.Mesh {
 
   setAngle(newAngle) {
     this.angle = newAngle;
+  }
+
+  getRadius() {
+    return this.radius;
   }
 }
