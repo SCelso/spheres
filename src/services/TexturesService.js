@@ -16,6 +16,10 @@ export class TexturesService {
     mesh.material = new THREE.MeshPhysicalMaterial(texturesLoaded);
   }
 
+  applyBackgroundTextureMapping(textureLoaded) {
+    textureLoaded.mapping = THREE.EquirectangularReflectionMapping;
+  }
+
   async loadTextures(textures) {
     try {
       const texturesToLoad = [

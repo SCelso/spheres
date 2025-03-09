@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import { Body } from "./Body";
 
 export class Planet extends Body {
@@ -8,12 +7,21 @@ export class Planet extends Body {
     widthSegments,
     heightSegments,
     sideralDay = 0,
-    orbitalPeriod = 0,
     orbited = undefined,
-    distanceToOrbited = 0,
     translateCounterClockWise = false,
     rotateCounterClockWise = false,
     canBeFocused = false,
+
+    mass,
+    velocity,
+    position,
+    distanceToOrbited,
+    eccentricity = 0,
+    semimajorAxis = 0,
+    inclination = 0,
+    longitudeOfAscendingNode = 0,
+    argumentOfPeriapsis = 0,
+    trailColor,
   }) {
     super({
       name,
@@ -21,12 +29,22 @@ export class Planet extends Body {
       widthSegments,
       heightSegments,
       sideralDay,
-      orbitalPeriod,
-      orbited,
       distanceToOrbited,
       translateCounterClockWise,
       rotateCounterClockWise,
       canBeFocused,
+
+      mass,
+      velocity,
+      position,
+
+      eccentricity,
+      semimajorAxis,
+      inclination,
+      longitudeOfAscendingNode,
+      argumentOfPeriapsis,
+      orbited,
+      trailColor,
     });
   }
   getTranslateCounterClockWise() {

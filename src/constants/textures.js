@@ -1,5 +1,3 @@
-import { emissive } from "three/tsl";
-
 export const earthTexturesRoute = {
   map: "/textures/earthAlbedo.png",
   bumpMap: "/textures/earthBump.png",
@@ -11,7 +9,7 @@ export const earthCloudsTexturesRoute = {
   bumpScale: 2,
   roughnessMap: null,
   alphaMap: "/textures/earthClouds.png",
-  trasparent: true,
+  transparent: true,
 };
 export const mercuryTexturesRoute = { map: "/textures/mercuryAlbedo.jpg" };
 export const moonTexturesRoute = {
@@ -43,3 +41,5 @@ export const texturesRouteMap = {
   moon: moonTexturesRoute,
   earthClouds: earthCloudsTexturesRoute,
 };
+
+export const BACKGROUND_TEXTURE_ROUTE = "/textures/backgroundTexture.png";

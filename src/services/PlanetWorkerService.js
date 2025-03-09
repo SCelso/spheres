@@ -1,42 +1,53 @@
 export class PlanetWorkerService {
-  constructor(planets) {
-    this.planets = planets;
-    this.worker = new Worker("src/worker.js");
+  constructor(initialBodies) {
+    this.bodies = [...initialBodies];
+    this.gravityWorker = new Worker("src/workers/gravityWorker.js");
 
-    this.worker.onmessage = (e) => {
+    this.gravityWorker.onmessage = (e) => {
       e.data.forEach((update) => {
-        const planet = this.planets.find((p) => p.id === update.id);
+        const planet = this.bodies.find((p) => p.id === update.id);
         if (planet) {
-          planet.position.set(update.newX, 0, update.newZ);
-          planet.rotation.y = update.newRotationAngle;
-          planet.translationAngle = update.newTranslationAngle;
+          planet.position.set(
+            update.position.x,
+            update.position.y,
+            update.position.z
+          );
+
+          planet.velocity.set(
+            update.velocity.x,
+            update.velocity.y,
+            update.velocity.z
+          );
+
+          planet.rotation.y = update.rotationAngle;
         }
       });
     };
   }
 
+  addBody(body) {
+    this.bodies.push(body);
+  }
+
   update(deltaTime) {
-    const planetsData = this.planets.map((planet) => {
-      const orbited = planet.getOrbited();
+    const planetsData = this.bodies.map((planet) => {
       return {
         id: planet.id,
         deltaTime,
-        orbitalPeriod: planet.getOrbitalPeriod(),
-        sideralDay: planet.getSideralDay(),
-        translationAngle: planet.translationAngle,
-        rotationAngle: planet.rotation.y,
-        distanceToOrbited: planet.getDistanceToOrbited(),
-        translateCCW: planet.getTranslateCounterClockWise(),
+        mass: planet.mass,
+        velocity: planet.velocity,
+        position: planet.position,
         rotateCCW: planet.getRotateCounterClockWise(),
-        orbitedX: orbited?.position.x || 0,
-        orbitedZ: orbited?.position.z || 0,
+        rotationAngle: planet.rotation.y,
+        sideralDay: planet.getSideralDay(),
+        name: planet.name,
       };
     });
 
-    this.worker.postMessage(planetsData);
+    this.gravityWorker.postMessage(planetsData);
   }
 
   dispose() {
-    this.worker.terminate();
+    this.gravityWorker.terminate();
   }
 }

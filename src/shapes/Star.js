@@ -5,6 +5,9 @@ export class Star extends Body {
   constructor({
     name,
     radius,
+    mass,
+    velocity,
+    position,
     widthSegments,
     heightSegments,
     canBeFocused = false,
@@ -21,7 +24,16 @@ export class Star extends Body {
     material.emissiveIntensity = 1;
     material.blendAlpha = 100;
 
-    super({ radius, name, canBeFocused, geometry, material });
+    super({
+      radius,
+      name,
+      mass,
+      velocity,
+      position,
+      canBeFocused,
+      geometry,
+      material,
+    });
   }
 
   addStar(scene) {

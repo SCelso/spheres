@@ -1,11 +1,17 @@
-export const SECOND = 0.00001;
+export const SCALE = 0.00000001;
+export const SECOND = 1;
 export const MINUTE = SECOND * 60;
 export const HOUR = MINUTE * 60;
 export const DAY = HOUR * 23.934469;
 export const YEAR = DAY * 365.25;
-export const MAX_ORBIT_POINTS = 1000;
-export const AU = 100;
-export const EARTH_SIZE = AU / 11727;
+
+export const METER = 1 / SCALE;
+export const KILOMETER = 1000 * METER;
+
+export const G = (6.674e-11 * SECOND ** 2) / METER ** 3;
+export const AU = 1.496e11;
+
+export const EARTH_SIZE = 6378e3 / METER;
 export const EARTH_CLOUDS_SIZE = EARTH_SIZE * 1.01;
 export const MOON_SIZE = EARTH_SIZE * 0.273;
 export const SUN_SIZE = EARTH_SIZE * (109 / 2);
@@ -17,63 +23,63 @@ export const SATURN_SIZE = EARTH_SIZE * 9.14;
 export const URANUS_SIZE = EARTH_SIZE * 3.98;
 export const NEPTUNE_SIZE = EARTH_SIZE * 3.86;
 
-export const MERCURY_SIDERAL_DAY = DAY * 58.6;
-export const VENUS_SIDERAL_DAY = DAY * 243;
-export const EARTH_SIDERAL_DAY = DAY;
-export const MARS_SIDERAL_DAY = HOUR * 24.6;
-export const JUPITER_SIDERAL_DAY = HOUR * 9.93;
-export const SATURN_SIDERAL_DAY = HOUR * 10.7;
-export const URANUS_SIDERAL_DAY = HOUR * 17.24;
-export const NEPTUNE_SIDERAL_DAY = HOUR * 16.11;
-export const MOON_SIDERAL_DAY = DAY * 27.3;
-export const EARTH_CLOUDS_SIDERAL_DAY = HOUR / 14;
+export const MERCURY_SIDERAL_DAY = (58.6 * DAY) / SECOND;
+export const VENUS_SIDERAL_DAY = (243 * DAY) / SECOND;
+export const EARTH_SIDERAL_DAY = DAY / SECOND;
+export const MARS_SIDERAL_DAY = (24.6 * HOUR) / SECOND;
+export const JUPITER_SIDERAL_DAY = (9.93 * HOUR) / SECOND;
+export const SATURN_SIDERAL_DAY = (10.7 * HOUR) / SECOND;
+export const URANUS_SIDERAL_DAY = (17.24 * HOUR) / SECOND;
+export const NEPTUNE_SIDERAL_DAY = (16.11 * HOUR) / SECOND;
+export const MOON_SIDERAL_DAY = (27.3 * DAY) / SECOND;
+export const EARTH_CLOUDS_SIDERAL_DAY = DAY / 1.4 / SECOND;
 
-export const MERCURY_ORBITAL_PERIOD = DAY * 88;
-export const VENUS_ORBITAL_PERIOD = DAY * 225;
-export const EARTH_ORBITAL_PERIOD = YEAR;
-export const MARS_ORBITAL_PERIOD = YEAR * 1.88;
-export const JUPITER_ORBITAL_PERIOD = YEAR * 11.86;
-export const SATURN_ORBITAL_PERIOD = YEAR * 29.46;
-export const URANUS_ORBITAL_PERIOD = YEAR * 84;
-export const NEPTUNE_ORBITAL_PERIOD = YEAR * 164.8;
-export const MOON_ORBITAL_PERIOD = DAY * 27.3;
-
-export const MOON_DISTANCE_TO_ORBITED = AU * 0.002499;
-export const MERCURY_DISTANCE_TO_ORBITED = AU * 0.39;
-export const VENUS_DISTANCE_TO_ORBITED = AU * 0.72;
-export const EARTH_DISTANCE_TO_ORBITED = AU;
-export const MARS_DISTANCE_TO_ORBITED = AU * 1.52;
-export const JUPITER_DISTANCE_TO_ORBITED = AU * 5.2;
-export const SATURN_DISTANCE_TO_ORBITED = AU * 9.5;
-export const URANUS_DISTANCE_TO_ORBITED = AU * 19.2;
-export const NEPTUNE_DISTANCE_TO_ORBITED = AU * 30.1;
-export const EARTH_CLOUDS_DISTANCE_TO_ORBITED = AU;
+export const EARTH_MASS = 5.9722e24;
+export const MOON_MASS = EARTH_MASS * 0.0123;
+export const SUN_MASS = 1.988416e30;
+export const MERCURY_MASS = EARTH_MASS * 0.0553;
+export const VENUS_MASS = EARTH_MASS * 0.815;
+export const MARS_MASS = EARTH_MASS * 0.107;
+export const JUPITER_MASS = EARTH_MASS * 317.83;
+export const STURN_MASS = EARTH_MASS * 95.2;
+export const URANUS_MASS = EARTH_MASS * 14.5;
+export const NEPTUNE_MASS = EARTH_MASS * 17.1;
 
 export const EARTH = {
   name: "earth",
   radius: EARTH_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: EARTH_MASS,
+  velocity: [0, 0, (-30.29e3 * SECOND) / METER],
   sideralDay: EARTH_SIDERAL_DAY,
-  orbitalPeriod: EARTH_ORBITAL_PERIOD,
-  distanceToOrbited: EARTH_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
   rotateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 147.1e9 / METER,
+  eccentricity: 0.0167,
+  inclination: 0,
+  argumentOfPeriapsis: 102.9,
+  longitudeOfAscendingNode: -11.26,
+  trailColor: [0.027, 0.18, 0.019],
 };
 export const MERCURY = {
   name: "mercury",
   radius: MERCURY_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: MERCURY_MASS,
+  velocity: [0, 0, (-58.97e3 * SECOND) / METER],
   sideralDay: MERCURY_SIDERAL_DAY,
-  orbitalPeriod: MERCURY_ORBITAL_PERIOD,
-  distanceToOrbited: MERCURY_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
   rotateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 57.9e9 / METER,
+  eccentricity: 0.2056,
+  inclination: 7,
+  argumentOfPeriapsis: 29.1,
+  longitudeOfAscendingNode: 48.3,
+  trailColor: [0.2, 0.2, 0.2],
 };
 export const EARTH_CLOUDS = {
   name: "earthClouds",
@@ -81,10 +87,7 @@ export const EARTH_CLOUDS = {
   widthSegments: 32,
   heightSegments: 32,
   sideralDay: EARTH_CLOUDS_SIDERAL_DAY,
-  orbitalPeriod: EARTH_ORBITAL_PERIOD,
-  distanceToOrbited: EARTH_CLOUDS_DISTANCE_TO_ORBITED,
   translateCounterClockWise: true,
-  isPlanet: false,
   canBeFocused: false,
 };
 export const VENUS = {
@@ -92,50 +95,69 @@ export const VENUS = {
   radius: VENUS_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: VENUS_MASS,
+  velocity: [0, 0, (-35.26e3 * SECOND) / METER],
   sideralDay: VENUS_SIDERAL_DAY,
-  orbitalPeriod: VENUS_ORBITAL_PERIOD,
-  distanceToOrbited: VENUS_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
-  isPlanet: true,
+  rotateCounterClockWise: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 108.2e9 / METER,
+  eccentricity: 0.0068,
+  inclination: 3.4,
+  argumentOfPeriapsis: 54.9,
+  longitudeOfAscendingNode: 76.7,
+  trailColor: [0.89, 0.733, 0.462],
 };
 export const MARS = {
   name: "mars",
   radius: MARS_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: MARS_MASS,
+  velocity: [0, 0, (-26.5e3 * SECOND) / METER],
   sideralDay: MARS_SIDERAL_DAY,
-  orbitalPeriod: MARS_ORBITAL_PERIOD,
-  distanceToOrbited: MARS_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
   rotateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 227.92e9 / METER,
+  eccentricity: 0.0934,
+  inclination: 1.85,
+  argumentOfPeriapsis: 286.5,
+  longitudeOfAscendingNode: 49.6,
+  trailColor: [0.827, 0.29, 0.141],
 };
 export const MOON = {
   name: "moon",
   radius: MOON_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: MOON_MASS,
+  velocity: [0, 0, (-3.8882e3 * SECOND) / METER],
   sideralDay: MOON_SIDERAL_DAY,
-  orbitalPeriod: MOON_ORBITAL_PERIOD,
-  distanceToOrbited: MOON_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "earth",
   canBeFocused: true,
+  semimajorAxis: 0.3844e9 / METER,
+  eccentricity: 0.0549,
+  inclination: 5.145,
+  argumentOfPeriapsis: 318,
+  longitudeOfAscendingNode: 125,
 };
 export const JUPITER = {
   name: "jupiter",
   radius: JUPITER_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: JUPITER_MASS,
+  velocity: [0, 0, (13.72e3 * SECOND) / METER],
   sideralDay: JUPITER_SIDERAL_DAY,
-  orbitalPeriod: JUPITER_ORBITAL_PERIOD,
-  distanceToOrbited: JUPITER_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
   rotateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 778.57e9 / METER,
+  eccentricity: 0.0489,
+  inclination: 1.3,
+  argumentOfPeriapsis: 273.9,
+  longitudeOfAscendingNode: 100.5,
 };
 export const SATURN = {
   name: "saturn",
@@ -143,38 +165,51 @@ export const SATURN = {
   widthSegments: 32,
   heightSegments: 32,
   sideralDay: SATURN_SIDERAL_DAY,
-  orbitalPeriod: SATURN_ORBITAL_PERIOD,
-  distanceToOrbited: SATURN_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
+  mass: STURN_MASS,
+  velocity: [0, 0, (10.14e3 * SECOND) / METER],
   rotateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 1433.53e9 / METER,
+  eccentricity: 0.0565,
+  inclination: 2.49,
+  argumentOfPeriapsis: 339.4,
+  longitudeOfAscendingNode: 113.6,
 };
 export const URANUS = {
   name: "uranus",
   radius: URANUS_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: URANUS_MASS,
+  velocity: [0, 0, (7.13e3 * SECOND) / METER],
   sideralDay: URANUS_SIDERAL_DAY,
-  orbitalPeriod: URANUS_ORBITAL_PERIOD,
-  distanceToOrbited: URANUS_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
   rotateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 2872.46e9 / METER,
+  eccentricity: 0.0457,
+  inclination: 0.77,
+  argumentOfPeriapsis: 96.5,
+  longitudeOfAscendingNode: 74.0,
 };
 export const NEPTUNE = {
   name: "neptune",
   radius: NEPTUNE_SIZE,
   widthSegments: 32,
   heightSegments: 32,
+  mass: NEPTUNE_MASS,
+  velocity: [0, 0, (5.47e3 * SECOND) / METER],
   sideralDay: NEPTUNE_SIDERAL_DAY,
-  orbitalPeriod: NEPTUNE_ORBITAL_PERIOD,
-  distanceToOrbited: NEPTUNE_DISTANCE_TO_ORBITED,
-  translateCounterClockWise: true,
   rotateCounterClockWise: true,
-  isPlanet: true,
+  orbited: "sun",
   canBeFocused: true,
+  semimajorAxis: 4495.06e9 / METER,
+  eccentricity: 0.0113,
+  inclination: 1.77,
+  argumentOfPeriapsis: 273.2,
+  longitudeOfAscendingNode: 131.8,
+  trailColor: [0.18, 0.352, 0.596],
 };
 
 export const SUN = {
@@ -182,11 +217,24 @@ export const SUN = {
   radius: SUN_SIZE,
   widthSegments: 32,
   heightSegments: 32,
-  isPlanet: false,
+  mass: SUN_MASS,
+  velocity: [0, 0, 0],
   canBeFocused: true,
 };
 
-export const MESHES_DEFINITION = [
+export const NBODY = {
+  name: "nbody",
+  radius: MOON_SIZE,
+  widthSegments: 32,
+  heightSegments: 32,
+  sideralDay: MOON_SIDERAL_DAY,
+  translateCounterClockWise: true,
+  canBeFocused: true,
+  velocity: [1.022, 0, 0],
+  mass: MOON_MASS,
+};
+
+export const PLANETS_DEFINITION = [
   MERCURY,
   VENUS,
   EARTH,
@@ -195,8 +243,8 @@ export const MESHES_DEFINITION = [
   SATURN,
   URANUS,
   NEPTUNE,
-  MOON,
-  EARTH_CLOUDS,
 ];
 
-export const TARGET_CAM_DISTANCE = 3;
+export const MOONS_DEFINITION = [MOON];
+
+export const TARGET_CAM_DISTANCE = 3.5;

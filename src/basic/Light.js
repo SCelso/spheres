@@ -1,7 +1,8 @@
 import * as THREE from "three";
+import { SCALE } from "../constants/constants";
 
 const light = new THREE.AmbientLight(0x404040);
-const pointLight = new THREE.PointLight(0xffffff, 1000, 0, 1.3);
+const pointLight = new THREE.PointLight(0xffffff, 10, 0, 0.25);
 pointLight.castShadow = true;
 pointLight.shadow.camera.near = 0.0001;
 pointLight.shadow.camera.far = 100000;
