@@ -1,5 +1,5 @@
 import { G } from "../constants/constants";
-const smoothing = 100;
+const smoothing = 1e-6;
 
 self.onmessage = (e) => {
   const planetsData = e.data;
@@ -54,11 +54,6 @@ self.onmessage = (e) => {
 
       const newVelBodyA = { x: newVelXBodyA, y: newVelYBodyA, z: newVelZBodyA };
       const newVelBodyB = { x: newVelXBodyB, y: newVelYBodyB, z: newVelZBodyB };
-
-      if (distance <= 10) {
-        bodyA.velocity = { x: 0, y: 0, z: 0 };
-        bodyB.velocity = { x: 0, y: 0, z: 0 };
-      }
 
       updates[i] = {
         deltaTime: bodyB.deltaTime,

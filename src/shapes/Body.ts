@@ -208,7 +208,7 @@ export class Body extends THREE.Mesh<
       positionInOrbitalPlane.applyMatrix4(rotationMatrix)
     );
 
-    const velocityInOrbitalPlane = new THREE.Vector3(0, 0, this.velocity.z);
+    const velocityInOrbitalPlane = new THREE.Vector3(...this.velocity);
     this.velocity.addVectors(
       velocityInOrbitalPlane.applyMatrix4(rotationMatrix),
       this.orbited.getVelocity()
