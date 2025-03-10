@@ -46,7 +46,7 @@ export const URANUS_MASS = EARTH_MASS * 14.5;
 export const NEPTUNE_MASS = EARTH_MASS * 17.1;
 
 export const EARTH = {
-  name: "earth",
+  name: "EARTH",
   radius: EARTH_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -54,7 +54,7 @@ export const EARTH = {
   velocity: [0, 0, (-30.29e3 * SECOND) / METER],
   sideralDay: EARTH_SIDERAL_DAY,
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 147.1e9 / METER,
   eccentricity: 0.0167,
@@ -64,7 +64,7 @@ export const EARTH = {
   trailColor: [0.027, 0.18, 0.019],
 };
 export const MERCURY = {
-  name: "mercury",
+  name: "MERCURY",
   radius: MERCURY_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -72,7 +72,7 @@ export const MERCURY = {
   velocity: [0, 0, (-58.97e3 * SECOND) / METER],
   sideralDay: MERCURY_SIDERAL_DAY,
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 57.9e9 / METER,
   eccentricity: 0.2056,
@@ -82,7 +82,7 @@ export const MERCURY = {
   trailColor: [0.2, 0.2, 0.2],
 };
 export const EARTH_CLOUDS = {
-  name: "earthClouds",
+  name: "EARTHCLOUDS",
   radius: EARTH_CLOUDS_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -91,7 +91,7 @@ export const EARTH_CLOUDS = {
   canBeFocused: false,
 };
 export const VENUS = {
-  name: "venus",
+  name: "VENUS",
   radius: VENUS_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -99,7 +99,7 @@ export const VENUS = {
   velocity: [0, 0, (-35.26e3 * SECOND) / METER],
   sideralDay: VENUS_SIDERAL_DAY,
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 108.2e9 / METER,
   eccentricity: 0.0068,
@@ -109,7 +109,7 @@ export const VENUS = {
   trailColor: [0.89, 0.733, 0.462],
 };
 export const MARS = {
-  name: "mars",
+  name: "MARS",
   radius: MARS_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -117,7 +117,7 @@ export const MARS = {
   velocity: [0, 0, (-26.5e3 * SECOND) / METER],
   sideralDay: MARS_SIDERAL_DAY,
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 227.92e9 / METER,
   eccentricity: 0.0934,
@@ -127,14 +127,14 @@ export const MARS = {
   trailColor: [0.827, 0.29, 0.141],
 };
 export const MOON = {
-  name: "moon",
+  name: "MOON",
   radius: MOON_SIZE,
   widthSegments: 32,
   heightSegments: 32,
   mass: MOON_MASS,
   velocity: [0, 0, (-3.8882e3 * SECOND) / METER],
   sideralDay: MOON_SIDERAL_DAY,
-  orbited: "earth",
+  orbited: "EARTH",
   canBeFocused: true,
   semimajorAxis: 0.3844e9 / METER,
   eccentricity: 0.0549,
@@ -143,7 +143,7 @@ export const MOON = {
   longitudeOfAscendingNode: 125,
 };
 export const JUPITER = {
-  name: "jupiter",
+  name: "JUPITER",
   radius: JUPITER_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -151,7 +151,7 @@ export const JUPITER = {
   velocity: [0, 0, (13.72e3 * SECOND) / METER],
   sideralDay: JUPITER_SIDERAL_DAY,
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 778.57e9 / METER,
   eccentricity: 0.0489,
@@ -160,7 +160,7 @@ export const JUPITER = {
   longitudeOfAscendingNode: 100.5,
 };
 export const SATURN = {
-  name: "saturn",
+  name: "SATURN",
   radius: SATURN_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -168,7 +168,7 @@ export const SATURN = {
   mass: STURN_MASS,
   velocity: [0, 0, (10.14e3 * SECOND) / METER],
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 1433.53e9 / METER,
   eccentricity: 0.0565,
@@ -177,7 +177,7 @@ export const SATURN = {
   longitudeOfAscendingNode: 113.6,
 };
 export const URANUS = {
-  name: "uranus",
+  name: "URANUS",
   radius: URANUS_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -185,7 +185,7 @@ export const URANUS = {
   velocity: [0, 0, (7.13e3 * SECOND) / METER],
   sideralDay: URANUS_SIDERAL_DAY,
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 2872.46e9 / METER,
   eccentricity: 0.0457,
@@ -194,7 +194,7 @@ export const URANUS = {
   longitudeOfAscendingNode: 74.0,
 };
 export const NEPTUNE = {
-  name: "neptune",
+  name: "NEPTUNE",
   radius: NEPTUNE_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -202,7 +202,7 @@ export const NEPTUNE = {
   velocity: [0, 0, (5.47e3 * SECOND) / METER],
   sideralDay: NEPTUNE_SIDERAL_DAY,
   rotateCounterClockWise: true,
-  orbited: "sun",
+  orbited: "SUN",
   canBeFocused: true,
   semimajorAxis: 4495.06e9 / METER,
   eccentricity: 0.0113,
@@ -213,13 +213,26 @@ export const NEPTUNE = {
 };
 
 export const SUN = {
-  name: "sun",
+  name: "SUN",
   radius: SUN_SIZE,
   widthSegments: 32,
   heightSegments: 32,
   mass: SUN_MASS,
   velocity: [0, 0, 0],
   canBeFocused: true,
+
+  // sideralDay: undefined,
+  // rotateCounterClockWise: undefined,
+  // orbited: undefined,
+  // semimajorAxis: undefined,
+  // eccentricity: undefined,
+  // inclination: undefined,
+  // argumentOfPeriapsis: undefined,
+  // longitudeOfAscendingNode: undefined,
+  // trailColor: undefined,
+
+  // material: undefined,
+  // geometry: undefined,
 };
 
 export const NBODY = {

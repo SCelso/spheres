@@ -7,7 +7,7 @@ export const earthCloudsTexturesRoute = {
   map: "/textures/earthClouds.png",
   bumpMap: "/textures/earthClouds.png",
   bumpScale: 2,
-  roughnessMap: null,
+  roughnessMap: "",
   alphaMap: "/textures/earthClouds.png",
   transparent: true,
 };
@@ -28,18 +28,47 @@ export const sunTexturesRoute = {
   emissive: 0xff8000,
 };
 
-export const texturesRouteMap = {
-  sun: sunTexturesRoute,
-  mercury: mercuryTexturesRoute,
-  venus: venusTexturesRoute,
-  earth: earthTexturesRoute,
-  mars: marsTexturesRoute,
-  jupiter: jupiterTexturesRoute,
-  saturn: saturnTexturesRoute,
-  uranus: uranusTexturesRoute,
-  neptune: neptuneTexturesRoute,
-  moon: moonTexturesRoute,
-  earthClouds: earthCloudsTexturesRoute,
+export const texturesRouteMap: TexturesRouteMapType = {
+  SUN: sunTexturesRoute,
+  MERCURY: mercuryTexturesRoute,
+  VENUS: venusTexturesRoute,
+  EARTH: earthTexturesRoute,
+  MARS: marsTexturesRoute,
+  JUPITER: jupiterTexturesRoute,
+  SATURN: saturnTexturesRoute,
+  URANUS: uranusTexturesRoute,
+  NEPTUNE: neptuneTexturesRoute,
+  MOON: moonTexturesRoute,
+  EARTHCLOUDS: earthCloudsTexturesRoute,
 };
+
+export type TexturesRouteMapType = {
+  [x in keyof typeof NamePlanets]: TextureRouteType;
+};
+
+export type TextureRouteType = {
+  map?: string;
+  bumpMap?: string;
+  bumpScale?: number;
+  roughnessMap?: string;
+  alphaMap?: string;
+  transparent?: boolean;
+  emissiveMap?: string;
+  emissive?: number;
+};
+
+export enum NamePlanets {
+  SUN,
+  MERCURY,
+  VENUS,
+  EARTH,
+  MARS,
+  JUPITER,
+  SATURN,
+  URANUS,
+  NEPTUNE,
+  MOON,
+  EARTHCLOUDS,
+}
 
 export const BACKGROUND_TEXTURE_ROUTE = "/textures/backgroundTexture.png";

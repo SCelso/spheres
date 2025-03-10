@@ -1,9 +1,10 @@
 import * as THREE from "three";
+import { Body } from "./Body";
+import { SUN } from "../constants/constants";
 
 export class Container extends THREE.Mesh {
-  currentTarget = undefined;
-
-  constructor(radius) {
+  currentTarget: Body = new Body(SUN);
+  constructor(radius: number) {
     const size = radius * 2;
 
     const geometry = new THREE.BoxGeometry(size, size, size);
@@ -16,11 +17,11 @@ export class Container extends THREE.Mesh {
     this.visible = false;
   }
 
-  setCurrentTarget(currentTarget) {
+  setCurrentTarget(currentTarget: Body) {
     this.currentTarget = currentTarget;
   }
 
-  getCurrentTarget() {
+  getCurrentTarget(): Body {
     return this.currentTarget;
   }
 }

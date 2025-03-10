@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { SCALE } from "../constants/constants";
 
 const light = new THREE.AmbientLight(0x404040);
 const pointLight = new THREE.PointLight(0xffffff, 10, 0, 0.25);

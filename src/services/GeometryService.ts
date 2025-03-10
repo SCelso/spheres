@@ -1,7 +1,8 @@
 import * as THREE from "three";
+import { Body, Container } from "../shapes";
 
 export class GeometryService {
-  static instance;
+  static instance: GeometryService;
 
   constructor() {}
 
@@ -12,7 +13,7 @@ export class GeometryService {
     return GeometryService.instance;
   }
 
-  getObjectSize(object) {
+  getObjectSize(object: THREE.Mesh) {
     const box = new THREE.Box3().setFromObject(object);
     const size = new THREE.Vector3();
     box.getSize(size);
@@ -20,7 +21,12 @@ export class GeometryService {
     return size;
   }
 
-  updateBoxSize(object3D, width, height, depth) {
+  updateBoxSize(
+    object3D: Container,
+    width: number,
+    height: number,
+    depth: number
+  ) {
     const newGeometry = new THREE.BoxGeometry(width, height, depth);
 
     if (object3D.geometry) {

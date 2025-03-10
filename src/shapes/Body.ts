@@ -1,50 +1,72 @@
 import * as THREE from "three";
 
-export class Body extends THREE.Mesh {
-  //distanceToOrbited = 0;
-  name = undefined;
-  radius = undefined;
-  widthSegments = undefined;
-  heightSegments = undefined;
-  mass;
-  velocity = new THREE.Vector3(0, 0, 0);
-  sideralDay = 0;
-  rotateCounterClockWise = false;
-  orbited = undefined;
-  canBeFocused = false;
-  semimajorAxis = 0;
-  eccentricity = 0;
-  inclination = 0;
-  argumentOfPeriapsis = 0;
-  longitudeOfAscendingNode = 0;
-  trailColor = [1, 1, 1];
+export class Body extends THREE.Mesh<
+  THREE.BufferGeometry,
+  THREE.Material | THREE.Material[]
+> {
+  radius: number;
+  widthSegments: number = 0;
+  heightSegments: number = 0;
+  mass: number;
+  velocity: THREE.Vector3;
 
-  trailDots = [];
-  trailLine;
+  sideralDay: number = 0;
+  rotateCounterClockWise: boolean = false;
+  orbited: Body | undefined;
+  canBeFocused: boolean = false;
+  semimajorAxis: number = 0;
+  eccentricity: number = 0;
+  inclination: number = 0;
+  argumentOfPeriapsis: number = 0;
+  longitudeOfAscendingNode: number = 0;
+  trailColor: number[] = [1, 1, 1];
+
+  trailDots: THREE.Vector3[] = [];
+  trailLine: THREE.Line = this.initializeTrailLine();
   rotateAngle = 0;
 
-  constructor({
-    name,
-    radius,
-    widthSegments,
-    heightSegments,
-    sideralDay = 0,
-    rotateCounterClockWise = false,
-    canBeFocused = false,
-    material = undefined,
-    geometry = undefined,
+  constructor(body: {
+    name: string;
+    radius: number;
+    widthSegments: number;
+    heightSegments: number;
+    sideralDay?: number;
+    rotateCounterClockWise?: boolean;
+    canBeFocused: boolean;
+    material?: THREE.Material;
+    geometry?: THREE.BufferGeometry;
 
-    mass = 0,
-    velocity = [0, 0, 0],
-
-    eccentricity = 0,
-    semimajorAxis = 0,
-    inclination = 0,
-    longitudeOfAscendingNode = 0,
-    argumentOfPeriapsis = 0,
-    orbited = undefined,
-    trailColor = [1, 1, 1],
+    position?: number[];
+    mass?: number;
+    velocity?: number[];
+    eccentricity?: number;
+    semimajorAxis?: number;
+    inclination?: number;
+    longitudeOfAscendingNode?: number;
+    argumentOfPeriapsis?: number;
+    trailColor?: number[];
   }) {
+    let {
+      name,
+      radius,
+      widthSegments,
+      heightSegments,
+      sideralDay,
+      rotateCounterClockWise,
+      canBeFocused,
+      material,
+      geometry,
+      mass,
+      velocity,
+      eccentricity,
+      semimajorAxis,
+      inclination,
+      longitudeOfAscendingNode,
+      argumentOfPeriapsis,
+      trailColor,
+      position,
+    } = body;
+
     material = material ?? new THREE.MeshStandardMaterial({ color: 0xffffff });
     geometry =
       geometry ??
@@ -52,44 +74,24 @@ export class Body extends THREE.Mesh {
     super(geometry, material);
     this.name = name;
     this.radius = radius;
-    this.sideralDay = sideralDay;
-    this.rotateCounterClockWise = rotateCounterClockWise;
+    this.sideralDay = sideralDay ?? 0;
+    this.rotateCounterClockWise = rotateCounterClockWise ?? false;
     this.canBeFocused = canBeFocused;
-    // this.distanceToOrbited = distanceToOrbited;
 
-    this.mass = mass;
-    this.velocity.set(...velocity);
-    // this.position.set(...position);
+    this.mass = mass ?? 0;
+    this.velocity = velocity
+      ? new THREE.Vector3(...velocity)
+      : new THREE.Vector3(0, 0, 0);
 
-    this.semimajorAxis = semimajorAxis;
-    this.eccentricity = eccentricity;
-    this.inclination = inclination;
-    this.argumentOfPeriapsis = argumentOfPeriapsis;
-    this.longitudeOfAscendingNode = longitudeOfAscendingNode;
+    this.semimajorAxis = semimajorAxis ?? 0;
+    this.eccentricity = eccentricity ?? 0;
+    this.inclination = inclination ?? 0;
+    this.argumentOfPeriapsis = argumentOfPeriapsis ?? 0;
+    this.longitudeOfAscendingNode = longitudeOfAscendingNode ?? 0;
 
-    this.orbited = orbited;
-    this.trailColor = trailColor;
+    this.trailColor = trailColor ?? [1, 1, 1];
 
     this.frustumCulled = false;
-    this.initializeTrailLine();
-    console.log(
-      this.distanceToOrbited,
-      this.sideralDay,
-      this.rotateAngle,
-      this.rotateCounterClockWise,
-      this.canBeFocused,
-      this.velocity,
-      this.mass,
-      this.trailDots,
-      this.trailLine,
-      orbited,
-      eccentricity,
-      semimajorAxis,
-      inclination,
-      longitudeOfAscendingNode,
-      argumentOfPeriapsis,
-      trailColor
-    );
   }
 
   getMass() {
@@ -110,19 +112,12 @@ export class Body extends THREE.Mesh {
   getSideralDay() {
     return this.sideralDay;
   }
-  // getDistanceToOrbited() {
-  //   return this.distanceToOrbited;
-  // }
 
   getOrbited() {
     return this.orbited;
   }
-  setOrbited(orbited) {
+  setOrbited(orbited: Body) {
     this.orbited = orbited;
-  }
-
-  setAngle(newAngle) {
-    this.angle = newAngle;
   }
 
   getRadius() {
@@ -150,7 +145,7 @@ export class Body extends THREE.Mesh {
     }
     geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
 
-    this.trailLine = new THREE.Line(
+    return new THREE.Line(
       geometry,
       new THREE.LineBasicMaterial({
         vertexColors: true,
@@ -191,12 +186,7 @@ export class Body extends THREE.Mesh {
   }
 
   initializePerihelionPosition() {
-    if (this.orbited == undefined) {
-      console.log(this.name);
-      this.orbited.position = new THREE.Vector3(0, 0, 0);
-    } else {
-      console.log(this.orbited.getVelocity());
-    }
+    if (!this.orbited) return;
     const perihelionDistance = this.semimajorAxis * (1 - this.eccentricity);
     const positionInOrbitalPlane = new THREE.Vector3(perihelionDistance, 0, 0);
     const inclinationRad = THREE.MathUtils.degToRad(this.inclination);
@@ -226,9 +216,9 @@ export class Body extends THREE.Mesh {
   }
 
   calculatePerihelionMatrix(
-    longitudeOfAscendingNode,
-    inclination,
-    argumentOfPeriapsis
+    longitudeOfAscendingNode: number,
+    inclination: number,
+    argumentOfPeriapsis: number
   ) {
     const rotationMatrix = new THREE.Matrix4();
 

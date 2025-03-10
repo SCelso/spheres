@@ -1,19 +1,19 @@
 import * as THREE from "three";
 import { GeometryService } from "./GeometryService";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { SUN_SIZE, TARGET_CAM_DISTANCE } from "../constants/constants";
-import { Container } from "../shapes";
+import { Body, Container } from "../shapes";
 import { renderer } from "../basic";
+import { SUN_SIZE, TARGET_CAM_DISTANCE } from "../constants/constants";
 
 export class CameraService {
-  static instance;
+  static instance: CameraService;
   orbitControls;
   camera;
   container = new Container(SUN_SIZE);
   geometryService;
-  bodiesTarget = [];
+  bodiesTarget: Body[] = [];
 
-  constructor(bodiesTarget) {
+  constructor(bodiesTarget: Body[]) {
     this.geometryService = GeometryService.getInstance();
     this.bodiesTarget = bodiesTarget;
     this.camera = this.createPerspectiveCamera({
@@ -34,16 +34,22 @@ export class CameraService {
     this.adjustDistanceCamera(this.container.getCurrentTarget());
   }
 
-  static getInstance(bodiesTarget) {
+  static getInstance(bodiesTarget: Body[]) {
     if (!CameraService.instance) {
       CameraService.instance = new CameraService(bodiesTarget);
     }
     return CameraService.instance;
   }
 
-  createPerspectiveCamera({ fov, aspect, near, far }) {
-    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    return camera;
+  createPerspectiveCamera(camera: {
+    fov: number;
+    aspect: number;
+    near: number;
+    far: number;
+  }) {
+    const { fov, aspect, near, far } = camera;
+    const cameraObject = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    return cameraObject;
   }
 
   changeCamera(planet = "") {
@@ -79,11 +85,11 @@ export class CameraService {
     return this.camera;
   }
 
-  setPositionInContainer(position) {
+  setPositionInContainer(position: THREE.Object3D<THREE.Object3DEventMap>) {
     this.container.copy(position);
   }
 
-  adjustDistanceCamera(currentTarget) {
+  adjustDistanceCamera(currentTarget: Body) {
     this.orbitControls.minDistance =
       currentTarget.getRadius() * TARGET_CAM_DISTANCE;
     this.orbitControls.maxDistance =

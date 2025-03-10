@@ -1,8 +1,12 @@
-export class WorkerPool {
-  constructor(workerPath, poolSize) {
+export class WorkerPool<T> {
+  workerPath;
+  pool: { worker: Worker; busy: boolean }[];
+  queue: { taskData: unknown; resolve: (e: T) => void }[];
+
+  constructor(workerPath: string, poolSize: number) {
     this.workerPath = workerPath;
     this.pool = Array(poolSize)
-      .fill()
+      .fill({})
       .map(() => ({
         worker: new Worker(workerPath, { type: "module" }),
         busy: false,
@@ -10,7 +14,7 @@ export class WorkerPool {
     this.queue = [];
   }
 
-  executeTask(taskData) {
+  executeTask(taskData: unknown): Promise<T> {
     return new Promise((resolve) => {
       const worker = this.getAvailableWorker();
       if (worker) {
@@ -25,7 +29,11 @@ export class WorkerPool {
     return this.pool.find((w) => !w.busy);
   }
 
-  runTask(worker, taskData, resolve) {
+  runTask(
+    worker: { worker: Worker; busy: boolean },
+    taskData: unknown,
+    resolve: (e: T) => void
+  ) {
     worker.busy = true;
     worker.worker.onmessage = (e) => {
       resolve(e.data);
@@ -37,9 +45,12 @@ export class WorkerPool {
 
   processQueue() {
     if (this.queue.length > 0) {
-      const { taskData, resolve } = this.queue.shift();
-      const worker = this.getAvailableWorker();
-      if (worker) this.runTask(worker, taskData, resolve);
+      const item = this.queue.shift();
+      if (item) {
+        const { taskData, resolve } = item;
+        const worker = this.getAvailableWorker();
+        if (worker) this.runTask(worker, taskData, resolve);
+      }
     }
   }
 

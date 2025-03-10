@@ -1,18 +1,24 @@
-import { deltaTime } from "three/tsl";
 import { G } from "../constants/constants";
 const smoothing = 100;
-const smoothingSquared = smoothing ** 2;
 
 self.onmessage = (e) => {
   const planetsData = e.data;
   const updates = [];
-
   updates.push(...planetsData);
   for (let i = 0; i < updates.length; i++) {
-    const bodyA = updates[i];
-
+    const bodyA: {
+      position: { x: number; y: number; z: number };
+      velocity: { x: number; y: number; z: number };
+      mass: number;
+      deltaTime: number;
+    } = updates[i];
     for (let j = i + 1; j < updates.length; j++) {
-      const bodyB = updates[j];
+      const bodyB: {
+        position: { x: number; y: number; z: number };
+        velocity: { x: number; y: number; z: number };
+        mass: number;
+        deltaTime: number;
+      } = updates[j];
 
       let distanceX = bodyB.position.x - bodyA.position.x;
       let distanceY = bodyB.position.y - bodyA.position.y;
@@ -23,7 +29,7 @@ self.onmessage = (e) => {
       let distance = Math.sqrt(distanceSquared);
 
       let force =
-        (G * bodyA.mass * bodyB.mass) / (distanceSquared + smoothingSquared);
+        (G * bodyA.mass * bodyB.mass) / (distanceSquared + smoothing ** 2);
 
       let normalizedX = distanceX / distance;
       let normalizedY = distanceY / distance;
@@ -55,27 +61,18 @@ self.onmessage = (e) => {
       }
 
       updates[i] = {
-        id: bodyA.id,
-        deltaTime: bodyA.deltaTime,
+        deltaTime: bodyB.deltaTime,
+
         mass: bodyA.mass,
         velocity: newVelBodyA,
         position: bodyA.position,
-        rotationAngle: bodyA.rotationAngle,
-        rotateCCW: bodyA.rotateCCW,
-        sideralDay: bodyA.sideralDay,
-        name: bodyA.name,
       };
 
       updates[j] = {
-        id: bodyB.id,
         deltaTime: bodyB.deltaTime,
         mass: bodyB.mass,
         velocity: newVelBodyB,
         position: bodyB.position,
-        rotationAngle: bodyB.rotationAngle,
-        rotateCCW: bodyB.rotateCCW,
-        sideralDay: bodyB.sideralDay,
-        name: bodyB.name,
       };
     }
   }
@@ -86,6 +83,5 @@ self.onmessage = (e) => {
     const newPositionZ = body.position.z + body.velocity.z * body.deltaTime;
     body.position = { x: newPositionX, y: newPositionY, z: newPositionZ };
   });
-
   self.postMessage(updates);
 };

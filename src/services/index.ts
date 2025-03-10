@@ -1,4 +1,4 @@
-import { CameraService } from "./cameraService";
+import { CameraService } from "./CameraService";
 import { GeometryService } from "./GeometryService";
 import { TexturesService } from "./TexturesService";
 
