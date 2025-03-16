@@ -27,6 +27,7 @@ export class Body extends THREE.Mesh<
   rotateAngle = 0;
   trailDotsRelative: THREE.Vector3[] = [];
   trailDotsGlobal: THREE.Vector3[] = [];
+  orbit: THREE.Line = new THREE.Line();
 
   prevAcceleration: THREE.Vector3;
   constructor(body: {
@@ -281,6 +282,10 @@ export class Body extends THREE.Mesh<
     );
 
     ellipse.applyMatrix4(matrix);
+    if (this.orbited) {
+      ellipse.position.copy(this.orbited.position);
+    }
+
     return ellipse;
   }
 }

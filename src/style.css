@@ -81,6 +81,15 @@ button {
   z-index: 10;
 }
 
+#orbits{
+  position: fixed;
+  right: 1%;
+  width: 10%;
+  min-width: 200px;
+  max-width: 250px;
+  min-height: 50px;
+}
+
 
 
 @media (max-width: 1023px) {
@@ -91,16 +100,16 @@ button {
     min-height: 100px;
     min-width:100%
   }
-#velocity{
-  font-size: 4em;
-}
-    #hideHUD{
-      top: 4%;
-      left: 0%;
-      
-      max-height: 90px;
-      min-width: 90px;
-    }
+  #velocity{
+    font-size: 4em;
+  }
+  #hideHUD{
+    top: 4%;
+    left: 0%;
+    
+    max-height: 90px;
+    min-width: 90px;
+  }
 }
 
 /* h1 {

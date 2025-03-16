@@ -13,7 +13,9 @@ export function calculateDeltaTime(
   previousTime: number,
   timeScale: { scale: number }
 ) {
-  return (currentTime - previousTime) / 1000 / timeScale.scale;
+  const deltaTime = (currentTime - previousTime) / 1000 / timeScale.scale;
+
+  return deltaTime;
 }
 
 export function calculateAccelerations(bodies: any[], allBodies: any[]) {

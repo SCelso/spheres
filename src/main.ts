@@ -13,7 +13,7 @@ import { WorkerPool } from "./services/WorkerPool";
 import { Body } from "./shapes/Body.js";
 
 async function init() {
-  const workerPoolSize = 4;
+  const workerPoolSize = 2;
   // const newVelocitiesWorkerPoolSize = 4;
   // const gravityWorkerPool = new WorkerPool<
   //   [
@@ -34,6 +34,7 @@ async function init() {
         acceleration: { x: number; y: number; z: number };
         velocity: { x: number; y: number; z: number };
         position: { x: number; y: number; z: number };
+        prevAcceleration: { x: number; y: number; z: number };
       }
     ]
   >("./src/workers/calculateNewPositions.worker.ts", workerPoolSize);
@@ -70,7 +71,7 @@ async function init() {
   const earth = allMeshes.filter((mesh) => mesh.name === "EARTH")[0];
   const bodiesWithGravity = [sun, ...planets, ...moons];
   const cameraTargets = allMeshes.filter((mesh) => mesh.canBeFocused);
-  const orbits = planets.map((body) => body.printOrbit());
+  const orbits = bodies.map((body) => body.printOrbit());
   //TEXTURES
   await initializeTextures();
 
@@ -82,8 +83,9 @@ async function init() {
   //HUD
   let timeScale = { scale: 1 };
   let scale = timeScale.scale;
-  const hudController = new HUDController(timeScale);
 
+  let orbitsVisible = { visible: true };
+  const hudController = new HUDController(timeScale, orbitsVisible);
   const sceneElements = [light, container, ...allMeshes, ...trails, ...orbits];
   addElementsToScene(sceneElements);
 
@@ -174,6 +176,16 @@ async function init() {
 
     await updateGravity(bodiesWithGravity, deltaTime, scale);
 
+    if (orbitsVisible.visible) {
+      bodies.forEach((body, i) => {
+        if (!body.orbited) return;
+        orbits[i].position.copy(body.orbited.position);
+      });
+      scene.add(...orbits);
+    } else {
+      scene.remove(...orbits);
+    }
+
     light.position.copy(sun.position);
     container.position.copy(container.getCurrentTarget()?.position);
     earthClouds.position.copy(earth.position);
@@ -201,13 +213,32 @@ async function init() {
     });
   }
 
+  type PlanetData = {
+    name: string;
+    prevAcceleration: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    position: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    velocity: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    mass: number;
+  };
   async function updateGravity(
     bodiesWithGravity: Body[], // Array de Body
     deltaTime: number,
     scale: number
   ) {
     // Aseguramos que prevAcceleration se inicialice correctamente:
-    const planetsData = bodiesWithGravity.map((planet: Body) => {
+    const planetsData: PlanetData[] = bodiesWithGravity.map((planet: Body) => {
       return {
         name: planet.name,
 
@@ -231,107 +262,138 @@ async function init() {
     });
 
     const chunkSize = Math.ceil(bodiesWithGravity.length / workerPoolSize);
-    const chunks = calculateChunks(chunkSize, planetsData);
+    const chunks: PlanetData[][] = calculateChunks(chunkSize, planetsData);
+    const yoshida = await yoshidaMethod(chunks, planetsData, scale, deltaTime);
 
-    const promisesPosition = chunks.map((chunk) => {
-      return calculateNewPositions.executeTask({
+    yoshida.forEach((chunk) => {
+      chunk.forEach((body) => {
+        const bodyObject = bodiesWithGravity.find(
+          (other: Body) => body.name === other.name
+        );
+        if (bodyObject) {
+          bodyObject.prevAcceleration.set(
+            body.prevAcceleration.x,
+            body.prevAcceleration.y,
+            body.prevAcceleration.z
+          );
+          bodyObject.position.set(
+            body.position.x,
+            body.position.y,
+            body.position.z
+          );
+          bodyObject.velocity.set(
+            body.velocity.x,
+            body.velocity.y,
+            body.velocity.z
+          );
+        }
+      });
+    });
+  }
+
+  async function yoshidaMethod(
+    chunks: PlanetData[][],
+    planetsData: PlanetData[],
+    scale: number,
+    deltaTime: number
+  ) {
+    const YOSHIDA_COEFFICIENTS = {
+      w1: 1.0 / (2.0 - Math.pow(2, 1 / 3)),
+      w2: -Math.pow(2, 1 / 3) / (2.0 - Math.pow(2, 1 / 3)),
+    };
+    const step = await leapFrog(
+      chunks,
+      planetsData,
+      scale,
+      YOSHIDA_COEFFICIENTS.w1 * deltaTime
+    );
+    const step1 = await leapFrog(
+      step,
+      planetsData,
+      scale,
+      YOSHIDA_COEFFICIENTS.w2 * deltaTime
+    );
+    const finalStep = await leapFrog(
+      step1,
+      planetsData,
+      scale,
+      YOSHIDA_COEFFICIENTS.w1 * deltaTime
+    );
+    return finalStep;
+  }
+
+  // const promises = chunks.map((chunk) => {
+  //   return gravityWorkerPool
+  //     .executeTask({ chunk, planetsData, scale, deltaTime })
+  //     .then((result) => {
+  //       result.forEach((body) => {
+  //         const bodyObject = bodiesWithGravity.find(
+  //           (other: Body) => body.name === other.name
+  //         );
+  //         if (bodyObject) {
+  //           bodyObject.prevAcceleration.set(
+  //             body.prevAcceleration.x,
+  //             body.prevAcceleration.y,
+  //             body.prevAcceleration.z
+  //           );
+  //           bodyObject.position.set(
+  //             body.position.x,
+  //             body.position.y,
+  //             body.position.z
+  //           );
+  //           bodyObject.velocity.set(
+  //             body.velocity.x,
+  //             body.velocity.y,
+  //             body.velocity.z
+  //           );
+  //         }
+  //       });
+  //     });
+  // });
+
+  //await Promise.all(promisesVelicities);
+  async function leapFrog(
+    chunks: any,
+    planetsData: any,
+    scale: any,
+    deltaTime: any
+  ) {
+    const halfVelBodiesPromises = chunks.map((chunk: any) =>
+      calculateNewVelocities.executeTask({
         chunk,
         planetsData,
         scale,
         deltaTime,
-      });
-    });
-    const positions = await Promise.all(promisesPosition);
-    const promisesVelicities = positions.map((chunk) => {
-      calculateNewVelocities
-        .executeTask({ chunk, planetsData, scale, deltaTime })
-        .then((result) => {
-          result.forEach((body) => {
-            const bodyObject = bodiesWithGravity.find(
-              (other: Body) => body.name === other.name
-            );
-            if (bodyObject) {
-              bodyObject.prevAcceleration.set(
-                body.prevAcceleration.x,
-                body.prevAcceleration.y,
-                body.prevAcceleration.z
-              );
-              bodyObject.position.set(
-                body.position.x,
-                body.position.y,
-                body.position.z
-              );
-              bodyObject.velocity.set(
-                body.velocity.x,
-                body.velocity.y,
-                body.velocity.z
-              );
-            }
-          });
-        });
-    });
-    // const promises = chunks.map((chunk) => {
-    //   return gravityWorkerPool
-    //     .executeTask({ chunk, planetsData, scale, deltaTime })
-    //     .then((result) => {
-    //       result.forEach((body) => {
-    //         const bodyObject = bodiesWithGravity.find(
-    //           (other: Body) => body.name === other.name
-    //         );
-    //         if (bodyObject) {
-    //           bodyObject.prevAcceleration.set(
-    //             body.prevAcceleration.x,
-    //             body.prevAcceleration.y,
-    //             body.prevAcceleration.z
-    //           );
-    //           bodyObject.position.set(
-    //             body.position.x,
-    //             body.position.y,
-    //             body.position.z
-    //           );
-    //           bodyObject.velocity.set(
-    //             body.velocity.x,
-    //             body.velocity.y,
-    //             body.velocity.z
-    //           );
-    //         }
-    //       });
-    //     });
-    // });
+      })
+    );
 
-    await Promise.all(promisesVelicities);
+    const halfVelocities = await Promise.all(halfVelBodiesPromises);
+
+    const completeStepPromises = halfVelocities.map((chunk) =>
+      calculateNewPositions.executeTask({ chunk, scale, deltaTime })
+    );
+    const positionStep = await Promise.all(completeStepPromises);
+    const completeVelBodiesPromises = positionStep.map((chunk) =>
+      calculateNewVelocities.executeTask({
+        chunk,
+        planetsData,
+        scale,
+        deltaTime,
+      })
+    );
+    const leapfrogStep = await Promise.all(completeVelBodiesPromises);
+    return leapfrogStep;
   }
 
   // Función para dividir los datos en chunks
-  function calculateChunks(
-    chunkSize: number,
-    planetsData: {
-      name: string;
-      prevAcceleration: {
-        x: number;
-        y: number;
-        z: number;
-      };
-      position: {
-        x: number;
-        y: number;
-        z: number;
-      };
-      velocity: {
-        x: number;
-        y: number;
-        z: number;
-      };
-      mass: number;
-    }[]
-  ) {
+  function calculateChunks(chunkSize: number, planetsData: PlanetData[]) {
     const chunks = [];
     let prev = 0;
     for (let i = chunkSize; i <= planetsData.length; i += chunkSize) {
       chunks.push(planetsData.slice(prev, i));
       prev = i;
     }
-    // Si quedan elementos sin asignar en el último chunk, se agregan
+
     if (prev < planetsData.length) {
       chunks.push(planetsData.slice(prev));
     }

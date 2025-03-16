@@ -9,8 +9,8 @@ export const YEAR = DAY * 365.25;
 export const METER = 1 / SCALE;
 export const KILOMETER = 1000 * METER;
 
-export const G = (6.674e-11 * SECOND ** 2) / METER ** 3;
-export const smoothing = 0;
+export const G = (6.7384e-11 * SECOND ** 2) / METER ** 3;
+export const smoothing = 1e-20;
 export const AU = 1.496e11;
 
 export const EARTH_SIZE = 6378e3 / METER;
