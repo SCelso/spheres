@@ -19,7 +19,7 @@ export class CameraService {
     this.camera = this.createPerspectiveCamera({
       fov: 75,
       aspect: window.innerWidth / window.innerHeight,
-      near: 1e-3,
+      near: 1e-9,
       far: 1e9,
     });
 
@@ -27,7 +27,8 @@ export class CameraService {
     this.orbitControls = new OrbitControls(this.camera, renderer.domElement);
 
     this.orbitControls.enablePan = false;
-
+    // this.orbitControls.enableDamping = true;
+    // this.orbitControls.dampingFactor = 0.1;
     this.orbitControls.zoomSpeed = 5;
     this.camera.position.set(-5, 0, 0);
     this.container.setCurrentTarget(this.bodiesTarget[0]);
@@ -52,12 +53,13 @@ export class CameraService {
     return cameraObject;
   }
 
-  changeCamera(planet = "") {
+  changeCamera(planet: string = "") {
     let planetIndex = 0;
 
     if (planet) {
+      console.log(this.bodiesTarget);
       const findIndex = this.bodiesTarget.findIndex(
-        (planetArray) => planetArray.name === planet
+        (planetArray) => planetArray.name === planet.toUpperCase()
       );
 
       findIndex > -1 ? (planetIndex = findIndex) : (planetIndex = 0);

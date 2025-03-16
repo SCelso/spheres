@@ -1,82 +1,142 @@
 import { G } from "../constants/constants";
-const smoothing = 1e-6;
+const smoothing = 0; // Valor ajustado para precisión
 
 self.onmessage = (e) => {
-  const planetsData = e.data;
-  const updates = [];
-  updates.push(...planetsData);
-  for (let i = 0; i < updates.length; i++) {
-    const bodyA: {
-      position: { x: number; y: number; z: number };
-      velocity: { x: number; y: number; z: number };
-      mass: number;
-      deltaTime: number;
-    } = updates[i];
-    for (let j = i + 1; j < updates.length; j++) {
-      const bodyB: {
-        position: { x: number; y: number; z: number };
-        velocity: { x: number; y: number; z: number };
-        mass: number;
-        deltaTime: number;
-      } = updates[j];
+  const { chunk, planetsData, scale, deltaTime } = e.data;
+  const updates = structuredClone(chunk);
+  const baseDt = deltaTime;
+  const subSteps = Math.floor(scale * 100);
+  const dt = (baseDt * scale) / subSteps;
+  const lambda = 1 / (2 - Math.pow(2, 1 / 3));
+  const mu = -Math.pow(2, 1 / 3) / (2 - Math.pow(2, 1 / 3));
 
-      let distanceX = bodyB.position.x - bodyA.position.x;
-      let distanceY = bodyB.position.y - bodyA.position.y;
-      let distanceZ = bodyB.position.z - bodyA.position.z;
+  const c = [1.3512071919596578, -1.7024143839193155, 1.3512071919596578];
+  const d = [1.3512071919596578, -1.7024143839193155, 1.3512071919596578];
+  for (let step = 0; step < subSteps; step++) {
+    updates.forEach(
+      (
+        body: {
+          prevAcceleration: { x: number; y: number; z: number };
+          position: { x: number; y: number; z: number };
+          velocity: { x: number; y: number; z: number };
+        },
+        i: number
+      ) => {
+        body.velocity.x += 0.5 * c[0] * dt * body.prevAcceleration.x;
+        body.velocity.y += 0.5 * c[0] * dt * body.prevAcceleration.y;
+        body.velocity.z += 0.5 * c[0] * dt * body.prevAcceleration.z;
 
-      let distanceSquared =
-        distanceX * distanceX + distanceY * distanceY + distanceZ * distanceZ;
-      let distance = Math.sqrt(distanceSquared);
+        // Drift: actualización de la posición
+        body.position.x += c[0] * dt * body.velocity.x;
+        body.position.y += c[0] * dt * body.velocity.y;
+        body.position.z += c[0] * dt * body.velocity.z;
+      }
+    );
 
-      let force =
-        (G * bodyA.mass * bodyB.mass) / (distanceSquared + smoothing ** 2);
+    const newAccelerations = calculateAccelerations(updates, planetsData);
+    updates.forEach(
+      (
+        body: {
+          velocity: { x: number; y: number; z: number };
+          prevAcceleration: { x: number; y: number; z: number };
+        },
+        i: number
+      ) => {
+        body.velocity.x += 0.5 * d[0] * dt * newAccelerations[i].x;
+        body.velocity.y += 0.5 * d[0] * dt * newAccelerations[i].y;
+        body.velocity.z += 0.5 * d[0] * dt * newAccelerations[i].z;
 
-      let normalizedX = distanceX / distance;
-      let normalizedY = distanceY / distance;
-      let normalizedZ = distanceZ / distance;
+        body.prevAcceleration = newAccelerations[i];
+      }
+    );
 
-      let accelerationBodyA = force / bodyA.mass;
-      let accelerationBodyB = force / bodyB.mass;
+    updates.forEach(
+      (
+        body: {
+          prevAcceleration: { x: number; y: number; z: number };
+          position: { x: number; y: number; z: number };
+          velocity: { x: number; y: number; z: number };
+        },
+        i: number
+      ) => {
+        body.position.x += c[1] * dt * body.velocity.x;
+        body.position.y += c[1] * dt * body.velocity.y;
+        body.position.z += c[1] * dt * body.velocity.z;
+      }
+    );
 
-      const newVelXBodyA =
-        bodyA.velocity.x + normalizedX * accelerationBodyA * bodyA.deltaTime;
-      const newVelYBodyA =
-        bodyA.velocity.y + normalizedY * accelerationBodyA * bodyA.deltaTime;
-      const newVelZBodyA =
-        bodyA.velocity.z + normalizedZ * accelerationBodyA * bodyA.deltaTime;
+    const newAccelerations1 = calculateAccelerations(updates, planetsData);
+    updates.forEach(
+      (
+        body: {
+          velocity: { x: number; y: number; z: number };
+          prevAcceleration: { x: number; y: number; z: number };
+        },
+        i: number
+      ) => {
+        body.velocity.x += 0.5 * d[1] * dt * newAccelerations1[i].x;
+        body.velocity.y += 0.5 * d[1] * dt * newAccelerations1[i].y;
+        body.velocity.z += 0.5 * d[1] * dt * newAccelerations1[i].z;
 
-      const newVelXBodyB =
-        bodyB.velocity.x - normalizedX * accelerationBodyB * bodyB.deltaTime;
-      const newVelYBodyB =
-        bodyB.velocity.y - normalizedY * accelerationBodyB * bodyB.deltaTime;
-      const newVelZBodyB =
-        bodyB.velocity.z - normalizedZ * accelerationBodyB * bodyB.deltaTime;
+        body.prevAcceleration = newAccelerations1[i];
+      }
+    );
+    updates.forEach(
+      (
+        body: {
+          prevAcceleration: { x: number; y: number; z: number };
+          position: { x: number; y: number; z: number };
+          velocity: { x: number; y: number; z: number };
+        },
+        i: number
+      ) => {
+        body.position.x += c[2] * dt * body.velocity.x;
+        body.position.y += c[2] * dt * body.velocity.y;
+        body.position.z += c[2] * dt * body.velocity.z;
+      }
+    );
 
-      const newVelBodyA = { x: newVelXBodyA, y: newVelYBodyA, z: newVelZBodyA };
-      const newVelBodyB = { x: newVelXBodyB, y: newVelYBodyB, z: newVelZBodyB };
+    const newAccelerations2 = calculateAccelerations(updates, planetsData);
+    updates.forEach(
+      (
+        body: {
+          velocity: { x: number; y: number; z: number };
+          prevAcceleration: { x: number; y: number; z: number };
+        },
+        i: number
+      ) => {
+        body.velocity.x += 0.5 * d[2] * dt * newAccelerations2[i].x;
+        body.velocity.y += 0.5 * d[2] * dt * newAccelerations2[i].y;
+        body.velocity.z += 0.5 * d[2] * dt * newAccelerations2[i].z;
 
-      updates[i] = {
-        deltaTime: bodyB.deltaTime,
-
-        mass: bodyA.mass,
-        velocity: newVelBodyA,
-        position: bodyA.position,
-      };
-
-      updates[j] = {
-        deltaTime: bodyB.deltaTime,
-        mass: bodyB.mass,
-        velocity: newVelBodyB,
-        position: bodyB.position,
-      };
-    }
+        body.prevAcceleration = newAccelerations2[i];
+      }
+    );
   }
 
-  updates.forEach((body) => {
-    const newPositionX = body.position.x + body.velocity.x * body.deltaTime;
-    const newPositionY = body.position.y + body.velocity.y * body.deltaTime;
-    const newPositionZ = body.position.z + body.velocity.z * body.deltaTime;
-    body.position = { x: newPositionX, y: newPositionY, z: newPositionZ };
-  });
   self.postMessage(updates);
 };
+
+// Cálculo preciso de aceleraciones
+function calculateAccelerations(bodies: any[], allBodies: any[]) {
+  return bodies.map((body) => {
+    const acceleration = { x: 0, y: 0, z: 0 };
+
+    allBodies.forEach((other) => {
+      if (body.name === other.name) return;
+
+      const dx = other.position.x - body.position.x;
+      const dy = other.position.y - body.position.y;
+      const dz = other.position.z - body.position.z;
+
+      const distanceSq = dx * dx + dy * dy + dz * dz + smoothing;
+      const distance = Math.sqrt(distanceSq);
+      const force = (G * body.mass * other.mass) / distanceSq;
+      acceleration.x += ((dx / distance) * force) / body.mass;
+      acceleration.y += ((dy / distance) * force) / body.mass;
+      acceleration.z += ((dz / distance) * force) / body.mass;
+    });
+
+    return acceleration;
+  });
+}

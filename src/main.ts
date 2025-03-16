@@ -13,14 +13,41 @@ import { WorkerPool } from "./services/WorkerPool";
 import { Body } from "./shapes/Body.js";
 
 async function init() {
-  const gravityWorkerPool = new WorkerPool<
+  const workerPoolSize = 4;
+  // const newVelocitiesWorkerPoolSize = 4;
+  // const gravityWorkerPool = new WorkerPool<
+  //   [
+  //     {
+  //       // prevAcceleration: { x: number; y: number; z: number };
+  //       name: string;
+  //       prevAcceleration: { x: number; y: number; z: number };
+  //       velocity: { x: number; y: number; z: number };
+  //       position: { x: number; y: number; z: number };
+  //     }
+  //   ]
+  // >("./src/workers/gravity.worker.ts", 1);
+
+  const calculateNewPositions = new WorkerPool<
     [
       {
+        name: string;
+        acceleration: { x: number; y: number; z: number };
         velocity: { x: number; y: number; z: number };
         position: { x: number; y: number; z: number };
       }
     ]
-  >("./src/workers/gravity.worker.ts", 1);
+  >("./src/workers/calculateNewPositions.worker.ts", workerPoolSize);
+
+  const calculateNewVelocities = new WorkerPool<
+    [
+      {
+        name: string;
+        velocity: { x: number; y: number; z: number };
+        position: { x: number; y: number; z: number };
+        prevAcceleration: { x: number; y: number; z: number };
+      }
+    ]
+  >("./src/workers/calculateNewVelocites.worker.ts", workerPoolSize);
 
   ///STATS
   const stats = new Stats();
@@ -43,6 +70,7 @@ async function init() {
   const earth = allMeshes.filter((mesh) => mesh.name === "EARTH")[0];
   const bodiesWithGravity = [sun, ...planets, ...moons];
   const cameraTargets = allMeshes.filter((mesh) => mesh.canBeFocused);
+  const orbits = planets.map((body) => body.printOrbit());
   //TEXTURES
   await initializeTextures();
 
@@ -53,12 +81,14 @@ async function init() {
 
   //HUD
   let timeScale = { scale: 1 };
+  let scale = timeScale.scale;
   const hudController = new HUDController(timeScale);
 
-  const sceneElements = [light, container, ...allMeshes, ...trails];
+  const sceneElements = [light, container, ...allMeshes, ...trails, ...orbits];
   addElementsToScene(sceneElements);
 
-  let previousTime = 0;
+  let previousTime = performance.now();
+
   requestAnimationFrame(animate);
 
   window.addEventListener("keypress", () => cameraService.changeCamera());
@@ -132,16 +162,18 @@ async function init() {
     scene.background = backgroundTextureLoaded;
   }
 
-  async function animate(currentTime: number) {
+  async function animate() {
     stats.begin();
-    const deltaTime = Calculations.calculateDeltaTime(
+    const currentTime = performance.now();
+    let deltaTime = Calculations.calculateDeltaTime(
       currentTime,
       previousTime,
       timeScale
     );
     previousTime = currentTime;
 
-    await updateGravity(bodiesWithGravity, deltaTime);
+    await updateGravity(bodiesWithGravity, deltaTime, scale);
+
     light.position.copy(sun.position);
     container.position.copy(container.getCurrentTarget()?.position);
     earthClouds.position.copy(earth.position);
@@ -150,9 +182,10 @@ async function init() {
     updateTrailDots(bodies);
     camera.lookAt(container.position);
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
 
     stats.end();
+
+    requestAnimationFrame(animate);
   }
 
   function addElementsToScene(elements: THREE.Object3D[]) {
@@ -168,9 +201,21 @@ async function init() {
     });
   }
 
-  async function updateGravity(bodies: Body[], deltaTime: number) {
-    const planetsData = bodies.map((planet) => {
+  async function updateGravity(
+    bodiesWithGravity: Body[], // Array de Body
+    deltaTime: number,
+    scale: number
+  ) {
+    // Aseguramos que prevAcceleration se inicialice correctamente:
+    const planetsData = bodiesWithGravity.map((planet: Body) => {
       return {
+        name: planet.name,
+
+        prevAcceleration: {
+          x: planet.prevAcceleration?.x || 0,
+          y: planet.prevAcceleration?.y || 0,
+          z: planet.prevAcceleration?.z || 0,
+        },
         position: {
           x: planet.position.x,
           y: planet.position.y,
@@ -182,28 +227,116 @@ async function init() {
           z: planet.velocity.z,
         },
         mass: planet.mass,
-        deltaTime,
       };
     });
 
-    const promises = bodies.map((body, i) =>
-      gravityWorkerPool.executeTask(planetsData).then((result) => {
-        body.position.set(
-          result[i].position.x,
-          result[i].position.y,
-          result[i].position.z
-        );
+    const chunkSize = Math.ceil(bodiesWithGravity.length / workerPoolSize);
+    const chunks = calculateChunks(chunkSize, planetsData);
 
-        body.velocity.set(
-          result[i].velocity.x,
-          result[i].velocity.y,
-          result[i].velocity.z
-        );
-      })
-    );
-    await Promise.all(promises);
+    const promisesPosition = chunks.map((chunk) => {
+      return calculateNewPositions.executeTask({
+        chunk,
+        planetsData,
+        scale,
+        deltaTime,
+      });
+    });
+    const positions = await Promise.all(promisesPosition);
+    const promisesVelicities = positions.map((chunk) => {
+      calculateNewVelocities
+        .executeTask({ chunk, planetsData, scale, deltaTime })
+        .then((result) => {
+          result.forEach((body) => {
+            const bodyObject = bodiesWithGravity.find(
+              (other: Body) => body.name === other.name
+            );
+            if (bodyObject) {
+              bodyObject.prevAcceleration.set(
+                body.prevAcceleration.x,
+                body.prevAcceleration.y,
+                body.prevAcceleration.z
+              );
+              bodyObject.position.set(
+                body.position.x,
+                body.position.y,
+                body.position.z
+              );
+              bodyObject.velocity.set(
+                body.velocity.x,
+                body.velocity.y,
+                body.velocity.z
+              );
+            }
+          });
+        });
+    });
+    // const promises = chunks.map((chunk) => {
+    //   return gravityWorkerPool
+    //     .executeTask({ chunk, planetsData, scale, deltaTime })
+    //     .then((result) => {
+    //       result.forEach((body) => {
+    //         const bodyObject = bodiesWithGravity.find(
+    //           (other: Body) => body.name === other.name
+    //         );
+    //         if (bodyObject) {
+    //           bodyObject.prevAcceleration.set(
+    //             body.prevAcceleration.x,
+    //             body.prevAcceleration.y,
+    //             body.prevAcceleration.z
+    //           );
+    //           bodyObject.position.set(
+    //             body.position.x,
+    //             body.position.y,
+    //             body.position.z
+    //           );
+    //           bodyObject.velocity.set(
+    //             body.velocity.x,
+    //             body.velocity.y,
+    //             body.velocity.z
+    //           );
+    //         }
+    //       });
+    //     });
+    // });
+
+    await Promise.all(promisesVelicities);
   }
 
+  // Función para dividir los datos en chunks
+  function calculateChunks(
+    chunkSize: number,
+    planetsData: {
+      name: string;
+      prevAcceleration: {
+        x: number;
+        y: number;
+        z: number;
+      };
+      position: {
+        x: number;
+        y: number;
+        z: number;
+      };
+      velocity: {
+        x: number;
+        y: number;
+        z: number;
+      };
+      mass: number;
+    }[]
+  ) {
+    const chunks = [];
+    let prev = 0;
+    for (let i = chunkSize; i <= planetsData.length; i += chunkSize) {
+      chunks.push(planetsData.slice(prev, i));
+      prev = i;
+    }
+    // Si quedan elementos sin asignar en el último chunk, se agregan
+    if (prev < planetsData.length) {
+      chunks.push(planetsData.slice(prev));
+    }
+    return chunks;
+  }
   function updateRotation(planets: Body[], deltaTime: number) {
     planets.forEach((body) => {
       const rotationIncrement = (2 * Math.PI * deltaTime) / body.sideralDay;

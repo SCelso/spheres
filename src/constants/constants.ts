@@ -1,4 +1,5 @@
-export const SCALE = 0.00000001;
+export const SCALE = 0.0000001;
+export let timeScale = { scale: 1 };
 export const SECOND = 1;
 export const MINUTE = SECOND * 60;
 export const HOUR = MINUTE * 60;
@@ -9,6 +10,7 @@ export const METER = 1 / SCALE;
 export const KILOMETER = 1000 * METER;
 
 export const G = (6.674e-11 * SECOND ** 2) / METER ** 3;
+export const smoothing = 0;
 export const AU = 1.496e11;
 
 export const EARTH_SIZE = 6378e3 / METER;
@@ -22,6 +24,7 @@ export const JUPITER_SIZE = EARTH_SIZE * 10.97;
 export const SATURN_SIZE = EARTH_SIZE * 9.14;
 export const URANUS_SIZE = EARTH_SIZE * 3.98;
 export const NEPTUNE_SIZE = EARTH_SIZE * 3.86;
+export const PHOBOS_SIZE = 1.108e4 / METER;
 
 export const MERCURY_SIDERAL_DAY = (58.6 * DAY) / SECOND;
 export const VENUS_SIDERAL_DAY = (243 * DAY) / SECOND;
@@ -33,6 +36,7 @@ export const URANUS_SIDERAL_DAY = (17.24 * HOUR) / SECOND;
 export const NEPTUNE_SIDERAL_DAY = (16.11 * HOUR) / SECOND;
 export const MOON_SIDERAL_DAY = (27.3 * DAY) / SECOND;
 export const EARTH_CLOUDS_SIDERAL_DAY = DAY / 1.4 / SECOND;
+export const PHOBOS_SIDERAL_DAY = (0.31891 * DAY) / SECOND;
 
 export const EARTH_MASS = 5.9722e24;
 export const MOON_MASS = EARTH_MASS * 0.0123;
@@ -44,6 +48,7 @@ export const JUPITER_MASS = EARTH_MASS * 317.83;
 export const STURN_MASS = EARTH_MASS * 95.2;
 export const URANUS_MASS = EARTH_MASS * 14.5;
 export const NEPTUNE_MASS = EARTH_MASS * 17.1;
+export const PHOBOS_MASS = 1.0659e16;
 
 export const EARTH = {
   name: "EARTH",
@@ -139,9 +144,60 @@ export const MOON = {
   semimajorAxis: 0.3844e9 / METER,
   eccentricity: 0.0549,
   inclination: 5.145,
-  argumentOfPeriapsis: 318.15,
-  longitudeOfAscendingNode: 125.08,
+  argumentOfPeriapsis: 0,
+  longitudeOfAscendingNode: 0,
 };
+
+export const PHOBOS = {
+  name: "PHOBOS",
+  radius: PHOBOS_SIZE,
+  widthSegments: 32,
+  heightSegments: 32,
+  mass: PHOBOS_MASS,
+  velocity: [0, 0, (-2.17e3 * SECOND) / METER],
+  sideralDay: PHOBOS_SIDERAL_DAY,
+  orbited: "MARS",
+  canBeFocused: true,
+  semimajorAxis: 9378e3 / METER,
+  eccentricity: 0.0151,
+  inclination: 1.08,
+  argumentOfPeriapsis: 0,
+  longitudeOfAscendingNode: 0,
+};
+
+export const TITAN = {
+  name: "TITAN",
+  radius: 25747e3 / METER,
+  widthSegments: 32,
+  heightSegments: 32,
+  mass: 1.3452e23,
+  velocity: [0, 0, (-5.57e3 * SECOND) / METER],
+  sideralDay: (15.945 * DAY) / SECOND,
+  orbited: "SATURN",
+  canBeFocused: true,
+  semimajorAxis: 1221870e3 / METER,
+  eccentricity: 0.0288,
+  inclination: 0.34854,
+  argumentOfPeriapsis: 294.3,
+  longitudeOfAscendingNode: 28.0,
+};
+
+// export const DEIMOS = {
+//   name: "DEIMOS",
+//   radius: PHOBOS_SIZE,
+//   widthSegments: 32,
+//   heightSegments: 32,
+//   mass: PHOBOS_MASS,
+//   velocity: [0, 0, (-1.35e3 * SECOND) / METER],
+//   sideralDay: PHOBOS_SIDERAL_DAY,
+//   orbited: "MARS",
+//   canBeFocused: true,
+//   semimajorAxis: 9378e9 / METER,
+//   eccentricity: 0.0151,
+//   inclination: 1.08,
+//   argumentOfPeriapsis: 0,
+//   longitudeOfAscendingNode: 0,
+// };
 export const JUPITER = {
   name: "JUPITER",
   radius: JUPITER_SIZE,
@@ -258,6 +314,6 @@ export const PLANETS_DEFINITION = [
   NEPTUNE,
 ];
 
-export const MOONS_DEFINITION = [MOON];
+export const MOONS_DEFINITION = [MOON, PHOBOS, TITAN];
 
 export const TARGET_CAM_DISTANCE = 3.5;

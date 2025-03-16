@@ -8,9 +8,7 @@ export class HUDController {
   isHUDHide = false;
   hideHUD = document.getElementById("hideHUD");
   velocityNumber = document.getElementById("velocity");
-  planetsButtons = document.querySelectorAll<HTMLElement>(
-    "div#planetButtons button"
-  );
+  planetsButtons = document.getElementById("planetButtons");
 
   constructor(timeScale: { scale: number }) {
     this.cameraService = CameraService.getInstance([]);
@@ -27,7 +25,7 @@ export class HUDController {
     } else if (timeScale.scale < 0) {
       timeScale.scale *= 10;
       this.velocityNumber.innerHTML = `${currentVelocity / 10}`;
-    } else if (timeScale.scale > 0 && timeScale.scale >= 1e-5) {
+    } else if (timeScale.scale > 0 && timeScale.scale >= 1e-3) {
       timeScale.scale /= 10;
       this.velocityNumber.innerHTML = `${currentVelocity * 10}`;
     }
@@ -44,19 +42,29 @@ export class HUDController {
     } else if (timeScale.scale > 0 && timeScale.scale < 1) {
       timeScale.scale *= 10;
       this.velocityNumber.innerHTML = `${currentVelocity / 10}`;
-    } else if (timeScale.scale < 0 && timeScale.scale <= -1e-5) {
+    } else if (timeScale.scale < 0 && timeScale.scale <= -1e-3) {
       timeScale.scale /= 10;
       this.velocityNumber.innerHTML = `${currentVelocity * 10}`;
     }
   }
 
   initializeButtonPlanets() {
-    this.planetsButtons.forEach((button) => {
-      const name = button!.textContent!.toUpperCase();
-      button.addEventListener("click", () =>
-        this.cameraService.changeCamera(name)
-      );
+    if (!this.planetsButtons) return;
+    this.planetsButtons.addEventListener("click", (event) => {
+      if (!event.target) return;
+      const target = event.target as HTMLElement;
+
+      if (target.matches("button")) {
+        this.cameraService.changeCamera(target.innerHTML);
+        console.log(target.innerHTML);
+      }
     });
+    // this.planetsButtons.forEach((button) => {
+    //   const name = button!.textContent!.toUpperCase();
+    //   button.addEventListener("click", () =>
+    //     this.cameraService.changeCamera(name)
+    //   );
+    // });
   }
 
   initializeSpeedButtons(timeScale: { scale: number }) {
@@ -92,8 +100,10 @@ export class HUDController {
         this.hideHUD!.style.opacity = "0.2";
       }
 
-      this.planetsButtons.forEach((button) => {
-        button.style.visibility = visibility;
+      Array.from(this.planetsButtons!.children).forEach((button) => {
+        if (button instanceof HTMLElement) {
+          button.style.visibility = visibility;
+        }
       });
 
       this.acelerarButton!.style.visibility = visibility;

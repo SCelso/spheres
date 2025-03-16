@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { G } from "../constants/constants";
 
 export class Body extends THREE.Mesh<
   THREE.BufferGeometry,
@@ -24,7 +25,10 @@ export class Body extends THREE.Mesh<
   trailDots: THREE.Vector3[] = [];
   trailLine: THREE.Line = this.initializeTrailLine();
   rotateAngle = 0;
+  trailDotsRelative: THREE.Vector3[] = [];
+  trailDotsGlobal: THREE.Vector3[] = [];
 
+  prevAcceleration: THREE.Vector3;
   constructor(body: {
     name: string;
     radius: number;
@@ -64,7 +68,6 @@ export class Body extends THREE.Mesh<
       longitudeOfAscendingNode,
       argumentOfPeriapsis,
       trailColor,
-      position,
     } = body;
 
     material = material ?? new THREE.MeshStandardMaterial({ color: 0xffffff });
@@ -83,6 +86,7 @@ export class Body extends THREE.Mesh<
       ? new THREE.Vector3(...velocity)
       : new THREE.Vector3(0, 0, 0);
 
+    this.prevAcceleration = new THREE.Vector3(0, 0, 0);
     this.semimajorAxis = semimajorAxis ?? 0;
     this.eccentricity = eccentricity ?? 0;
     this.inclination = inclination ?? 0;
@@ -150,7 +154,6 @@ export class Body extends THREE.Mesh<
       new THREE.LineBasicMaterial({
         vertexColors: true,
         transparent: true,
-
         blending: THREE.NormalBlending,
       })
     );
@@ -159,7 +162,7 @@ export class Body extends THREE.Mesh<
   printTrailLine() {
     this.trailLine.geometry.dispose();
     this.trailLine.geometry = new THREE.BufferGeometry().setFromPoints(
-      this.trailDots
+      this.trailDotsGlobal
     );
 
     const colors = new Float32Array(this.trailDots.length * 4);
@@ -178,11 +181,24 @@ export class Body extends THREE.Mesh<
   }
 
   updateTrailDots() {
-    if (this.trailDots.length >= 100) {
-      this.trailDots.shift();
-    }
+    if (!this.orbited) return;
 
-    this.trailDots.push(this.position.clone());
+    // 1. Calcular posición RELATIVA al planeta orbitado
+    const relativePosition = this.position.clone().sub(this.orbited.position);
+
+    // 2. Mantener el histórico de posiciones relativas
+    if (this.trailDotsRelative.length >= 100) {
+      this.trailDotsRelative.shift();
+    }
+    this.trailDotsRelative.push(relativePosition);
+
+    // 3. Convertir a posiciones globales usando la posición ACTUAL del planeta
+    this.trailDotsGlobal = this.trailDotsRelative.map((relPos) =>
+      relPos.clone().add(this.orbited!.position)
+    );
+
+    // 4. Actualizar los puntos de la estela visible
+    this.trailDots = this.trailDotsGlobal;
   }
 
   initializePerihelionPosition() {
@@ -231,5 +247,40 @@ export class Body extends THREE.Mesh<
     );
 
     return rotationMatrix;
+  }
+
+  printOrbit() {
+    const semiminorAxis =
+      this.semimajorAxis * Math.sqrt(1 - this.eccentricity * this.eccentricity);
+    const focus = this.semimajorAxis * this.eccentricity;
+
+    const curve = new THREE.EllipseCurve(
+      -focus,
+      0,
+      this.semimajorAxis,
+      semiminorAxis,
+      0,
+      2 * Math.PI,
+      false,
+      0
+    );
+
+    const points2D = curve.getPoints(1000);
+    const points3D = points2D.map((p) => new THREE.Vector3(p.x, 0, p.y));
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points3D);
+    const material = new THREE.LineBasicMaterial({
+      color: new THREE.Color(...this.trailColor),
+    });
+    const ellipse = new THREE.Line(geometry, material);
+
+    const matrix = this.calculatePerihelionMatrix(
+      THREE.MathUtils.degToRad(this.longitudeOfAscendingNode),
+      THREE.MathUtils.degToRad(this.inclination),
+      THREE.MathUtils.degToRad(this.argumentOfPeriapsis)
+    );
+
+    ellipse.applyMatrix4(matrix);
+    return ellipse;
   }
 }
