@@ -1,4 +1,6 @@
-import { G, smoothing } from "../constants/constants";
+import { G, SECOND, smoothing } from "../constants/constants";
+import { PlanetData } from "../main";
+import * as THREE from "three";
 
 export function calculateAngularIncrement(
   secondsPerLap: number,
@@ -8,35 +10,74 @@ export function calculateAngularIncrement(
   return angleIncrementRadians;
 }
 
-export function calculateDeltaTime(
-  currentTime: number,
-  previousTime: number,
-  timeScale: { scale: number }
-) {
-  const deltaTime = (currentTime - previousTime) / 1000 / timeScale.scale;
-
-  return deltaTime;
+export function calculateDeltaTime(currentTime: number, previousTime: number) {
+  return (currentTime - previousTime) / 1000;
 }
 
-export function calculateAccelerations(bodies: any[], allBodies: any[]) {
+export function calculateAccelerations(
+  bodies: PlanetData[],
+  allBodies: PlanetData[]
+) {
   return bodies.map((body) => {
-    const acceleration = { x: 0, y: 0, z: 0 };
+    const acceleration = new THREE.Vector3();
 
     allBodies.forEach((other) => {
       if (body.name === other.name) return;
 
-      const dx = other.position.x - body.position.x;
-      const dy = other.position.y - body.position.y;
-      const dz = other.position.z - body.position.z;
+      const direction = new THREE.Vector3().subVectors(
+        other.position,
+        body.position
+      );
 
-      const distanceSq = dx * dx + dy * dy + dz * dz + smoothing;
-      const distance = Math.sqrt(distanceSq);
-      const force = (G * body.mass * other.mass) / distanceSq;
-      acceleration.x += ((dx / distance) * force) / body.mass;
-      acceleration.y += ((dy / distance) * force) / body.mass;
-      acceleration.z += ((dz / distance) * force) / body.mass;
+      const distanceSq = direction.lengthSq() + smoothing;
+      const accelerationMagnitude = (G * other.mass) / distanceSq;
+      direction.normalize().multiplyScalar(accelerationMagnitude);
+      acceleration.add(direction);
     });
 
     return acceleration;
+  });
+}
+export function calculateAccelerationsAndJerks(
+  bodies: PlanetData[],
+  allBodies: PlanetData[]
+) {
+  bodies.forEach((body) => {
+    body.acceleration = new THREE.Vector3();
+    body.jerk = new THREE.Vector3();
+    allBodies.forEach((other) => {
+      if (body.name === other.name) return;
+
+      const deltaPosition = new THREE.Vector3().subVectors(
+        other.position,
+        body.position
+      );
+
+      const deltaVelocity = new THREE.Vector3().subVectors(
+        other.velocity,
+        body.velocity
+      );
+
+      const distanceSq = deltaPosition.lengthSq() + smoothing;
+      const distance = Math.sqrt(distanceSq);
+      const distanceCubic = distanceSq * distance;
+      const accelerationMagnitude = (G * other.mass) / distanceCubic;
+      const accelerationComponent = deltaPosition
+        .clone()
+        .multiplyScalar(accelerationMagnitude);
+
+      body.acceleration.add(accelerationComponent);
+
+      const productPoint = deltaPosition.dot(deltaVelocity);
+
+      const jerkScalar = (3 * productPoint) / distanceSq;
+
+      const jerkComponent = deltaPosition
+        .clone()
+        .multiplyScalar(jerkScalar)
+        .sub(deltaVelocity)
+        .multiplyScalar(accelerationMagnitude);
+      body.jerk.add(jerkComponent);
+    });
   });
 }

@@ -1,4 +1,6 @@
 import { CameraService } from "../services";
+import { timeScale } from "../constants/constants";
+import { Body } from "../shapes";
 
 export class HUDController {
   cameraService;
@@ -11,14 +13,18 @@ export class HUDController {
   planetsButtons = document.getElementById("planetButtons");
 
   orbitsButton = document.getElementById("orbits");
-
+  timeScale;
+  bodies: Body[];
   constructor(
     timeScale: { scale: number },
-    obitsVisible: { visible: boolean }
+    obitsVisible: { visible: boolean },
+    bodies: Body[]
   ) {
+    this.bodies = bodies;
+    this.timeScale = timeScale;
     this.cameraService = CameraService.getInstance([]);
     this.initializeButtonPlanets();
-    this.initializeSpeedButtons(timeScale);
+    this.initializeSpeedButtons();
     this.initilizeHideButton();
     this.initializeOrbitsButton(obitsVisible);
   }
@@ -29,10 +35,10 @@ export class HUDController {
       timeScale.scale /= -1;
       this.velocityNumber.innerHTML = `${currentVelocity * -1}`;
     } else if (timeScale.scale < 0) {
-      timeScale.scale *= 10;
-      this.velocityNumber.innerHTML = `${currentVelocity / 10}`;
-    } else if (timeScale.scale > 0 && timeScale.scale >= 1e-3) {
       timeScale.scale /= 10;
+      this.velocityNumber.innerHTML = `${currentVelocity / 10}`;
+    } else if (timeScale.scale > 0 && timeScale.scale <= 1e6) {
+      timeScale.scale *= 10;
       this.velocityNumber.innerHTML = `${currentVelocity * 10}`;
     }
   }
@@ -45,12 +51,12 @@ export class HUDController {
     if (timeScale.scale >= 1 && timeScale.scale <= 1.1) {
       timeScale.scale /= -1;
       this.velocityNumber.innerHTML = `${currentVelocity * -1}`;
-    } else if (timeScale.scale > 0 && timeScale.scale < 1) {
+    } else if (timeScale.scale < 0 && timeScale.scale >= -1e6) {
       timeScale.scale *= 10;
-      this.velocityNumber.innerHTML = `${currentVelocity / 10}`;
-    } else if (timeScale.scale < 0 && timeScale.scale <= -1e-3) {
-      timeScale.scale /= 10;
       this.velocityNumber.innerHTML = `${currentVelocity * 10}`;
+    } else if (timeScale.scale > 0) {
+      timeScale.scale /= 10;
+      this.velocityNumber.innerHTML = `${currentVelocity / 10}`;
     }
   }
   initializeOrbitsButton(orbitsVisible: { visible: boolean }) {
@@ -73,16 +79,16 @@ export class HUDController {
     });
   }
 
-  initializeSpeedButtons(timeScale: { scale: number }) {
+  initializeSpeedButtons() {
     if (!this.velocityNumber) return;
-    this.velocityNumber.innerHTML = timeScale.scale.toString();
+    this.velocityNumber.innerHTML = this.timeScale.scale.toString();
     if (!this.acelerarButton || !this.decelerarButton) return;
     this.acelerarButton.addEventListener("click", () => {
-      this.acelerate(timeScale);
+      this.acelerate(this.timeScale);
     });
 
     this.decelerarButton.addEventListener("click", () => {
-      this.decelerate(timeScale);
+      this.decelerate(this.timeScale);
     });
   }
 
@@ -91,7 +97,8 @@ export class HUDController {
       !this.hideHUD ||
       !this.acelerarButton ||
       !this.decelerarButton ||
-      !this.velocityNumber
+      !this.velocityNumber ||
+      !this.orbitsButton
     ) {
       return;
     }
@@ -114,6 +121,7 @@ export class HUDController {
         }
       });
 
+      this.orbitsButton!.style.visibility = visibility;
       this.acelerarButton!.style.visibility = visibility;
       this.decelerarButton!.style.visibility = visibility;
       this.velocityNumber!.style.visibility = visibility;

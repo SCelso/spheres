@@ -1,9 +1,10 @@
 import * as THREE from "three";
-import { Color } from "three/webgpu";
+import { Body } from "../shapes";
+import { TextureRouteType } from "../constants/textures";
 
 export class TexturesService {
-  instance;
   loader = new THREE.TextureLoader();
+  static instance: TexturesService;
 
   static getInstance() {
     if (!TexturesService.instance) {
@@ -12,15 +13,15 @@ export class TexturesService {
     return TexturesService.instance;
   }
 
-  applyTextures(mesh, texturesLoaded) {
+  applyTextures(mesh: Body, texturesLoaded: THREE.MeshPhongMaterialParameters) {
     mesh.material = new THREE.MeshPhysicalMaterial(texturesLoaded);
   }
 
-  applyBackgroundTextureMapping(textureLoaded) {
+  applyBackgroundTextureMapping(textureLoaded: THREE.Texture) {
     textureLoaded.mapping = THREE.EquirectangularReflectionMapping;
   }
 
-  async loadTextures(textures) {
+  async loadTextures(textures: TextureRouteType) {
     try {
       const texturesToLoad = [
         textures.map,
@@ -30,7 +31,10 @@ export class TexturesService {
         textures.emissiveMap,
       ];
       const texturesLoaded = await Promise.all(
-        texturesToLoad.map((texture) => this.loadTexture(texture))
+        texturesToLoad.map((texture) => {
+          if (!texture) return null;
+          return this.loadTexture(texture);
+        })
       );
       const texturesLoadedMap = {
         map: texturesLoaded[0],
@@ -39,17 +43,17 @@ export class TexturesService {
         roughnessMap: texturesLoaded[2],
         alphaMap: texturesLoaded[3],
         emissiveMap: texturesLoaded[4],
-        emissive: textures.emissive ? new Color(textures.emissive) : null,
+        emissive: textures.emissive ? new THREE.Color(textures.emissive) : null,
         transparent: textures.transparent ?? null,
       };
 
       return texturesLoadedMap;
     } catch {
-      console.error("Error loading textures:", error);
+      console.error("Error loading textures:", Error);
     }
   }
 
-  async loadTexture(texture) {
+  async loadTexture(texture: string) {
     if (!texture) return null;
 
     return this.loader.loadAsync(texture).catch((error) => {

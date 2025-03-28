@@ -1,3 +1,4 @@
+import { DEIMOS } from "./constants";
 export const earthTexturesRoute = {
   map: "/textures/earthAlbedo.png",
   bumpMap: "/textures/earthBump.png",
@@ -42,6 +43,7 @@ export const texturesRouteMap: TexturesRouteMapType = {
   EARTHCLOUDS: earthCloudsTexturesRoute,
   PHOBOS: {},
   TITAN: {},
+  DEIMOS: {},
 };
 
 export type TexturesRouteMapType = {
@@ -73,6 +75,7 @@ export enum NamePlanets {
   EARTHCLOUDS,
   PHOBOS,
   TITAN,
+  DEIMOS,
 }
 
 export const BACKGROUND_TEXTURE_ROUTE = "/textures/backgroundTexture.png";
