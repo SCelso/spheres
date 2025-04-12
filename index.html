@@ -2,17 +2,17 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>My first three.js app</title>
+		<title>SolarSystem | Sergio Celso</title>
 		
 			<link rel="stylesheet" href="/src/style.css">
 		
 	</head>
 	<body>
 		<script type="module" src="/src/main.ts"></script>
-		<div id="velocityButtons"> 
-			<button id="decelerar">&lt;&lt;</button>
-			<span id="velocity" >1</span>
-			<button id="acelerar">&gt;&gt;</button>
+	
+		<div class="slidecontainer">
+			<span id="sliderNumber">0</span>
+			<input type="range" min="-100" max="100" step="0.1" value="1" class="slider" id="myRange">
 		</div>
 
 		<div id="planetButtons" >
@@ -38,7 +38,8 @@
 					<button>Neptune</button>
 			
 		</div>
-		<button id="orbits">Orbits</button>
+		<button id="gravityButton">Gravity ⚠</button>
+		<button id="orbits" >Orbits</button>
 		<button id="hideHUD" >👁</button>
 	</body>
 </html>

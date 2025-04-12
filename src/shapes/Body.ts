@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { G } from "../constants/constants";
 
 export class Body extends THREE.Mesh<
   THREE.BufferGeometry,
@@ -22,8 +21,7 @@ export class Body extends THREE.Mesh<
   longitudeOfAscendingNode: number = 0;
   trailColor: number[] = [1, 1, 1];
 
-  // trailDots: THREE.Vector3[] = [];
-  // trailLine: THREE.Line = this.initializeTrailLine();
+  trailLineGravity: THREE.Line;
   rotateAngle = 0;
   trailDotsRelative: THREE.Vector3[] = [];
   trailDotsGlobal: THREE.Vector3[] = [];
@@ -37,8 +35,9 @@ export class Body extends THREE.Mesh<
   orbitalPeriod: number = 0;
   orbitCounterClockwise = true;
 
-  acceleration: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-  jerk: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+  perihelionPosisition = new THREE.Vector3();
+  perihelionVelocity = new THREE.Vector3();
+  perihelionMatrix = new THREE.Matrix4();
 
   constructor(body: {
     name: string;
@@ -107,14 +106,16 @@ export class Body extends THREE.Mesh<
     this.argumentOfPeriapsis = argumentOfPeriapsis ?? 0;
     this.longitudeOfAscendingNode = longitudeOfAscendingNode ?? 0;
 
-    this.trailColor = trailColor ?? [0.1, 0.1, 0.1];
+    this.trailColor = trailColor ?? [0.5, 0.5, 0.5];
     this.orbitalPeriod = orbitalPeriod ?? 0;
     this.orbitCounterClockwise = orbitCounterClockwise ?? false;
-    console.log(orbitCounterClockwise);
-    this.frustumCulled = false;
+    this.perihelionMatrix = this.calculatePerihelionMatrix();
     this.orbitLine = this.createOrbit();
     this.trailMaterial = this.createTrailMaterial();
     this.trailLine = this.createTrailLine();
+    this.trailLineGravity = this.initializeTrailLine();
+
+    this.frustumCulled = false;
   }
 
   getMass() {
@@ -154,92 +155,77 @@ export class Body extends THREE.Mesh<
     return this.trailLine;
   }
 
-  // getTrailDots() {
-  //   return this.trailDots;
-  // }
+  getGravityTrailLine() {
+    return this.trailLineGravity;
+  }
 
-  // getTrailLine() {
-  //   return this.trailLine;
-  // }
+  private initializeTrailLine() {
+    const geometry = new THREE.BufferGeometry().setFromPoints(
+      this.trailDotsGlobal
+    );
 
-  // initializeTrailLine() {
-  //   const geometry = new THREE.BufferGeometry().setFromPoints(this.trailDots);
+    const colors = new Float32Array(this.trailDotsGlobal.length * 4);
+    for (let i = 0; i < this.trailDotsGlobal.length; i++) {
+      const ratio = i / (this.trailDotsGlobal.length - 1);
+      colors[i * 4] = this.trailColor[0];
+      colors[i * 4 + 1] = this.trailColor[1];
+      colors[i * 4 + 2] = this.trailColor[2];
+      colors[i * 4 + 3] = 0 + ratio;
+    }
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
 
-  //   const colors = new Float32Array(this.trailDots.length * 4);
-  //   for (let i = 0; i < this.trailDots.length; i++) {
-  //     const ratio = i / (this.trailDots.length - 1);
-  //     colors[i * 4] = this.trailColor[0];
-  //     colors[i * 4 + 1] = this.trailColor[1];
-  //     colors[i * 4 + 2] = this.trailColor[2];
-  //     colors[i * 4 + 3] = 0 + ratio;
-  //   }
-  //   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
+    return new THREE.Line(
+      geometry,
+      new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        blending: THREE.NormalBlending,
+      })
+    );
+  }
 
-  //   return new THREE.Line(
-  //     geometry,
-  //     new THREE.LineBasicMaterial({
-  //       vertexColors: true,
-  //       transparent: true,
-  //       blending: THREE.NormalBlending,
-  //     })
-  //   );
-  // }
+  public printTrailLineGravity() {
+    this.trailLineGravity.geometry.dispose();
+    this.trailLineGravity.geometry = new THREE.BufferGeometry().setFromPoints(
+      this.trailDotsGlobal
+    );
 
-  // printTrailLine() {
-  //   this.trailLine.geometry.dispose();
-  //   this.trailLine.geometry = new THREE.BufferGeometry().setFromPoints(
-  //     this.trailDotsGlobal
-  //   );
+    const colors = new Float32Array(this.trailDotsGlobal.length * 4);
+    for (let i = 0; i < this.trailDotsGlobal.length; i++) {
+      const ratio = i / (this.trailDotsGlobal.length - 1);
+      colors[i * 4] = this.trailColor[0];
+      colors[i * 4 + 1] = this.trailColor[1];
+      colors[i * 4 + 2] = this.trailColor[2];
+      colors[i * 4 + 3] = 0 + ratio;
+    }
 
-  //   const colors = new Float32Array(this.trailDots.length * 4);
-  //   for (let i = 0; i < this.trailDots.length; i++) {
-  //     const ratio = i / (this.trailDots.length - 1);
-  //     colors[i * 4] = this.trailColor[0];
-  //     colors[i * 4 + 1] = this.trailColor[1];
-  //     colors[i * 4 + 2] = this.trailColor[2];
-  //     colors[i * 4 + 3] = 0 + ratio;
-  //   }
+    this.trailLineGravity.geometry.setAttribute(
+      "color",
+      new THREE.BufferAttribute(colors, 4)
+    );
+  }
 
-  //   this.trailLine.geometry.setAttribute(
-  //     "color",
-  //     new THREE.BufferAttribute(colors, 4)
-  //   );
-  // }
+  public updateTrailDots() {
+    if (!this.orbited) return;
 
-  // updateTrailDots() {
-  //   if (!this.orbited) return;
+    const relativePosition = this.position.clone().sub(this.orbited.position);
 
-  //   const relativePosition = this.position.clone().sub(this.orbited.position);
+    if (this.trailDotsRelative.length >= 100) {
+      this.trailDotsRelative.shift();
+    }
+    this.trailDotsRelative.push(relativePosition);
 
-  //   if (this.trailDotsRelative.length >= 100) {
-  //     this.trailDotsRelative.shift();
-  //   }
-  //   this.trailDotsRelative.push(relativePosition);
+    this.trailDotsGlobal = this.trailDotsRelative.map((relPos) =>
+      relPos.clone().add(this.orbited!.position)
+    );
+  }
 
-  //   this.trailDotsGlobal = this.trailDotsRelative.map((relPos) =>
-  //     relPos.clone().add(this.orbited!.position)
-  //   );
-
-  //   this.trailDots = this.trailDotsGlobal;
-  // }
-
-  initializePerihelionPosition() {
+  public initializePerihelionPosition() {
     if (!this.orbited) return;
     const perihelionDistance = this.semimajorAxis * (1 - this.eccentricity);
     const positionInOrbitalPlane = new THREE.Vector3(perihelionDistance, 0, 0);
-    const inclinationRad = THREE.MathUtils.degToRad(this.inclination);
-    const argumentOfPeriapsisRad = THREE.MathUtils.degToRad(
-      this.argumentOfPeriapsis
-    );
-    const longitudeOfAscendingNodeRad = THREE.MathUtils.degToRad(
-      this.longitudeOfAscendingNode
-    );
 
-    const rotationMatrix = this.calculatePerihelionMatrix(
-      longitudeOfAscendingNodeRad,
-      inclinationRad,
-      argumentOfPeriapsisRad
-    );
+    const rotationMatrix = this.perihelionMatrix;
 
     this.position.addVectors(
       this.orbited.getPosition(),
@@ -251,27 +237,39 @@ export class Body extends THREE.Mesh<
       velocityInOrbitalPlane.applyMatrix4(rotationMatrix),
       this.orbited.getVelocity()
     );
+
+    this.perihelionPosisition.copy(this.position);
+    this.perihelionVelocity.copy(this.velocity);
   }
 
-  calculatePerihelionMatrix(
-    longitudeOfAscendingNode: number,
-    inclination: number,
-    argumentOfPeriapsis: number
-  ) {
+  private calculatePerihelionMatrix() {
+    const inclinationRad = THREE.MathUtils.degToRad(this.inclination);
+    const argumentOfPeriapsisRad = THREE.MathUtils.degToRad(
+      this.argumentOfPeriapsis
+    );
+    const longitudeOfAscendingNodeRad = THREE.MathUtils.degToRad(
+      this.longitudeOfAscendingNode
+    );
+
     const rotationMatrix = new THREE.Matrix4();
 
-    rotationMatrix.makeRotationY(-longitudeOfAscendingNode);
+    rotationMatrix.makeRotationY(-longitudeOfAscendingNodeRad);
 
-    rotationMatrix.multiply(new THREE.Matrix4().makeRotationX(-inclination));
+    rotationMatrix.multiply(new THREE.Matrix4().makeRotationX(-inclinationRad));
 
     rotationMatrix.multiply(
-      new THREE.Matrix4().makeRotationY(-argumentOfPeriapsis)
+      new THREE.Matrix4().makeRotationY(-argumentOfPeriapsisRad)
     );
 
     return rotationMatrix;
   }
 
-  fillOrbitDots() {
+  public resetPosition() {
+    this.position.copy(this.perihelionPosisition);
+    this.velocity.copy(this.perihelionVelocity);
+  }
+
+  private fillOrbitDots() {
     const semiminorAxis =
       this.semimajorAxis * Math.sqrt(1 - this.eccentricity * this.eccentricity);
     const focus = this.semimajorAxis * this.eccentricity;
@@ -291,7 +289,7 @@ export class Body extends THREE.Mesh<
     this.orbitDots = points2D.map((p) => new THREE.Vector3(p.x, 0, p.y));
   }
 
-  createOrbit() {
+  private createOrbit() {
     this.fillOrbitDots();
     const geometry = new THREE.BufferGeometry().setFromPoints(this.orbitDots);
     const material = new THREE.LineBasicMaterial({
@@ -311,12 +309,7 @@ export class Body extends THREE.Mesh<
 
     const ellipse = new THREE.Line(geometry, material);
 
-    const matrix = this.calculatePerihelionMatrix(
-      THREE.MathUtils.degToRad(this.longitudeOfAscendingNode),
-      THREE.MathUtils.degToRad(this.inclination),
-      THREE.MathUtils.degToRad(this.argumentOfPeriapsis)
-    );
-
+    const matrix = this.perihelionMatrix;
     ellipse.applyMatrix4(matrix);
     if (this.orbited) {
       ellipse.position.copy(this.orbited.position);
@@ -325,7 +318,7 @@ export class Body extends THREE.Mesh<
     return ellipse;
   }
 
-  createTrailLine(): THREE.Line {
+  private createTrailLine(): THREE.Line {
     this.trailLine = new THREE.Line(
       this.orbitLine.geometry.clone(),
       this.trailMaterial
@@ -336,7 +329,7 @@ export class Body extends THREE.Mesh<
     return this.trailLine;
   }
 
-  createTrailMaterial(): THREE.ShaderMaterial {
+  private createTrailMaterial(): THREE.ShaderMaterial {
     return new THREE.ShaderMaterial({
       vertexShader: ` varying vec3 vWorldPosition;
       varying vec3 vPosition;
@@ -382,7 +375,7 @@ export class Body extends THREE.Mesh<
     });
   }
 
-  updateOrbitalPosition(deltaTime: number, timeScale: number) {
+  public updateOrbitalPosition(deltaTime: number, timeScale: number) {
     if (!this.orbited) return;
     const direction = this.orbitCounterClockwise ? -1 : 1;
 
@@ -401,37 +394,28 @@ export class Body extends THREE.Mesh<
     const x = r * Math.cos(trueAnomaly);
     const z = r * Math.sin(trueAnomaly);
     const posInOrbitalPlane = new THREE.Vector3(x, 0, z);
-    const rotationMatrix = this.calculatePerihelionMatrix(
-      THREE.MathUtils.degToRad(this.longitudeOfAscendingNode),
-      THREE.MathUtils.degToRad(this.inclination),
-      THREE.MathUtils.degToRad(this.argumentOfPeriapsis)
-    );
-    // Calcular tangente en el plano orbital original
-    const tangentInPlane = new THREE.Vector3(-z, 0, x).normalize(); // Tangente perpendicular a la posición
+    const rotationMatrix = this.perihelionMatrix;
     const position = posInOrbitalPlane.clone().applyMatrix4(rotationMatrix);
 
     this.position.copy(position.add(this.orbited.position));
     if (this.trailLine && this.trailMaterial) {
-      // Calcular dirección del movimiento
-
+      const tangentInPlane = new THREE.Vector3(-z, 0, x).normalize();
+      const tangent = tangentInPlane.clone().applyMatrix4(rotationMatrix);
+      tangent.multiplyScalar(timeScale > 0 ? direction : -direction);
       this.trailMaterial.uniforms.planetPosition.value.copy(this.position);
 
-      const tangent = tangentInPlane.clone().applyMatrix4(rotationMatrix);
-      tangent.multiplyScalar(this.orbitCounterClockwise ? -1 : 1); // Ajustar dirección
-
       this.trailMaterial.uniforms.velocityDir.value.copy(tangent);
-
       this.trailMaterial.uniforms.trailLength.value =
-        (timeScale / 1000000) * this.semimajorAxis;
-      //   this.acceleration.lengthSq;
-
-      // const desiredTrailTime = 10;
+        (Math.abs(timeScale) / 1000000) * this.semimajorAxis;
 
       this.trailMaterial.uniformsNeedUpdate = true;
     }
   }
 
-  calculateTrueAnomaly(meanAnomaly: number, eccentricity: number): number {
+  private calculateTrueAnomaly(
+    meanAnomaly: number,
+    eccentricity: number
+  ): number {
     let E = meanAnomaly;
     let delta = 1;
 
@@ -449,22 +433,16 @@ export class Body extends THREE.Mesh<
     );
   }
 
-  getPositionInOrbit(trueAnomaly: number): THREE.Vector3 {
+  private getPositionInOrbit(trueAnomaly: number): THREE.Vector3 {
     const r =
       (this.semimajorAxis * (1 - this.eccentricity ** 2)) /
       (1 + this.eccentricity * Math.cos(trueAnomaly));
 
-    // Posición en el plano orbital
     const x = r * Math.cos(trueAnomaly);
     const y = 0;
     const z = r * Math.sin(trueAnomaly);
 
-    // Rotación según parámetros orbitales
-    const rotationMatrix = this.calculatePerihelionMatrix(
-      THREE.MathUtils.degToRad(this.longitudeOfAscendingNode),
-      THREE.MathUtils.degToRad(this.inclination),
-      THREE.MathUtils.degToRad(this.argumentOfPeriapsis)
-    );
+    const rotationMatrix = this.perihelionMatrix;
 
     return new THREE.Vector3(x, y, z).applyMatrix4(rotationMatrix);
   }

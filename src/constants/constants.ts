@@ -60,7 +60,31 @@ export const URANUS_MASS = EARTH_MASS * 14.5;
 export const NEPTUNE_MASS = EARTH_MASS * 17.1;
 export const PHOBOS_MASS = 1.0659e16;
 
-export const EARTH = {
+export type BodyDefinition = {
+  name: string;
+  radius: number;
+  widthSegments: number;
+  heightSegments: number;
+  mass: number;
+  position?: number[];
+  velocity: number[];
+  sideralDay?: number;
+  orbited: string;
+  rotateCounterClockWise?: boolean;
+
+  canBeFocused: boolean;
+  semimajorAxis?: number;
+  eccentricity?: number;
+  translateCounterClockWise?: boolean;
+
+  inclination?: number;
+  argumentOfPeriapsis?: number;
+  longitudeOfAscendingNode?: number;
+  orbitCounterClockwise?: boolean;
+  trailColor?: number[];
+  orbitalPeriod?: number;
+};
+export const EARTH: BodyDefinition = {
   name: "EARTH",
   radius: EARTH_SIZE,
   widthSegments: 32,
@@ -73,6 +97,7 @@ export const EARTH = {
   canBeFocused: true,
   semimajorAxis: 149.598e9 / METER,
   eccentricity: 0.0167,
+
   inclination: 0,
   argumentOfPeriapsis: 102.9,
   longitudeOfAscendingNode: -11.26,
@@ -80,7 +105,7 @@ export const EARTH = {
   orbitalPeriod: EARTH_ORBITAL_PERIOD,
   orbitCounterClockwise: true,
 };
-export const MERCURY = {
+export const MERCURY: BodyDefinition = {
   name: "MERCURY",
   radius: MERCURY_SIZE,
   widthSegments: 32,
@@ -100,7 +125,7 @@ export const MERCURY = {
   orbitalPeriod: MERCURY_ORBITAL_PERIOD,
   orbitCounterClockwise: true,
 };
-export const EARTH_CLOUDS = {
+export const EARTH_CLOUDS: BodyDefinition = {
   name: "EARTHCLOUDS",
   radius: EARTH_CLOUDS_SIZE,
   widthSegments: 32,
@@ -108,8 +133,11 @@ export const EARTH_CLOUDS = {
   sideralDay: EARTH_CLOUDS_SIDERAL_DAY,
   translateCounterClockWise: true,
   canBeFocused: false,
+  mass: 0,
+  velocity: [],
+  orbited: "",
 };
-export const VENUS = {
+export const VENUS: BodyDefinition = {
   name: "VENUS",
   radius: VENUS_SIZE,
   widthSegments: 32,
@@ -129,7 +157,7 @@ export const VENUS = {
   orbitalPeriod: VENUS_ORBITAL_PERIOD,
   orbitCounterClockwise: true,
 };
-export const MARS = {
+export const MARS: BodyDefinition = {
   name: "MARS",
   radius: MARS_SIZE,
   widthSegments: 32,
@@ -150,7 +178,7 @@ export const MARS = {
   orbitCounterClockwise: true,
 };
 
-export const JUPITER = {
+export const JUPITER: BodyDefinition = {
   name: "JUPITER",
   radius: JUPITER_SIZE,
   widthSegments: 32,
@@ -168,7 +196,7 @@ export const JUPITER = {
   longitudeOfAscendingNode: 100.5,
   orbitalPeriod: JUPITER_ORBITAL_PERIOD,
 };
-export const SATURN = {
+export const SATURN: BodyDefinition = {
   name: "SATURN",
   radius: SATURN_SIZE,
   widthSegments: 32,
@@ -186,7 +214,7 @@ export const SATURN = {
   longitudeOfAscendingNode: 113.6,
   orbitalPeriod: SATURN_ORBITAL_PERIOD,
 };
-export const URANUS = {
+export const URANUS: BodyDefinition = {
   name: "URANUS",
   radius: URANUS_SIZE,
   widthSegments: 32,
@@ -204,7 +232,7 @@ export const URANUS = {
   longitudeOfAscendingNode: 74.0,
   orbitalPeriod: URANUS_ORBITAL_PERIOD,
 };
-export const NEPTUNE = {
+export const NEPTUNE: BodyDefinition = {
   name: "NEPTUNE",
   radius: NEPTUNE_SIZE,
   widthSegments: 32,
@@ -224,7 +252,7 @@ export const NEPTUNE = {
   orbitalPeriod: NEPTUNE_ORBITAL_PERIOD,
 };
 
-export const SUN = {
+export const SUN: BodyDefinition = {
   name: "SUN",
   radius: SUN_SIZE,
   widthSegments: 32,
@@ -232,22 +260,10 @@ export const SUN = {
   mass: SUN_MASS,
   velocity: [0, 0, 0],
   canBeFocused: true,
-
-  // sideralDay: undefined,
-  // rotateCounterClockWise: undefined,
-  // orbited: undefined,
-  // semimajorAxis: undefined,
-  // eccentricity: undefined,
-  // inclination: undefined,
-  // argumentOfPeriapsis: undefined,
-  // longitudeOfAscendingNode: undefined,
-  // trailColor: undefined,
-
-  // material: undefined,
-  // geometry: undefined,
+  orbited: "",
 };
 
-export const MOON = {
+export const MOON: BodyDefinition = {
   name: "MOON",
   radius: MOON_SIZE,
   widthSegments: 32,
@@ -266,7 +282,7 @@ export const MOON = {
   orbitCounterClockwise: true,
 };
 
-export const PHOBOS = {
+export const PHOBOS: BodyDefinition = {
   name: "PHOBOS",
   radius: PHOBOS_SIZE,
   widthSegments: 32,
@@ -275,7 +291,7 @@ export const PHOBOS = {
   velocity: [0, 0, (-2.17e3 * SECOND) / METER],
   sideralDay: PHOBOS_SIDERAL_DAY,
   orbited: "MARS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 9378e3 / METER,
   eccentricity: 0.0151,
   inclination: 1.08,
@@ -285,7 +301,7 @@ export const PHOBOS = {
   orbitalPeriod: 0.31891 * DAY,
 };
 
-export const TITAN = {
+export const TITAN: BodyDefinition = {
   name: "TITAN",
   radius: 25747e3 / METER,
   widthSegments: 32,
@@ -294,7 +310,7 @@ export const TITAN = {
   velocity: [0, 0, (-5.57e3 * SECOND) / METER],
   sideralDay: (15.945 * DAY) / SECOND,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1221870e3 / METER,
   eccentricity: 0.0288,
   inclination: 0.34854,
@@ -304,7 +320,7 @@ export const TITAN = {
   orbitalPeriod: 15.945421 * DAY,
 };
 
-export const DEIMOS = {
+export const DEIMOS: BodyDefinition = {
   name: "DEIMOS",
   radius: PHOBOS_SIZE,
   widthSegments: 32,
@@ -313,7 +329,7 @@ export const DEIMOS = {
   velocity: [0, 0, (-1.35e3 * SECOND) / METER],
   sideralDay: PHOBOS_SIDERAL_DAY,
   orbited: "MARS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 23459e3 / METER,
   eccentricity: 0.0005,
   inclination: 1.79,
@@ -322,7 +338,7 @@ export const DEIMOS = {
   orbitCounterClockwise: true,
   orbitalPeriod: 1.26244 * DAY,
 };
-export const EUROPA = {
+export const EUROPA: BodyDefinition = {
   name: "EUROPA",
   radius: 1560.8e3 / METER, // km
   widthSegments: 32,
@@ -331,7 +347,7 @@ export const EUROPA = {
   velocity: [0, 0, (-1.37e3 * SECOND) / METER],
   sideralDay: 3.551 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 670900e3 / METER,
   eccentricity: 0.009,
   inclination: 0.466,
@@ -341,7 +357,7 @@ export const EUROPA = {
   orbitalPeriod: 3.551 * DAY,
 };
 
-export const GANYMEDE = {
+export const GANYMEDE: BodyDefinition = {
   name: "GANYMEDE",
   radius: 2634.1e3 / METER, // km
   widthSegments: 32,
@@ -350,7 +366,7 @@ export const GANYMEDE = {
   velocity: [0, 0, (-1.08e3 * SECOND) / METER],
   sideralDay: 7.154 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1070400e3 / METER,
   eccentricity: 0.0013,
   inclination: 0.177,
@@ -360,7 +376,7 @@ export const GANYMEDE = {
   orbitalPeriod: 7.154 * DAY,
 };
 
-export const CALLISTO = {
+export const CALLISTO: BodyDefinition = {
   name: "CALLISTO",
   radius: 2410.3e3 / METER, // km
   widthSegments: 32,
@@ -369,7 +385,7 @@ export const CALLISTO = {
   velocity: [0, 0, (-0.82e3 * SECOND) / METER],
   sideralDay: 16.689 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1882700e3 / METER,
   eccentricity: 0.007,
   inclination: 0.192,
@@ -379,7 +395,7 @@ export const CALLISTO = {
   orbitalPeriod: 16.689 * DAY,
 };
 
-export const IO = {
+export const IO: BodyDefinition = {
   name: "IO",
   radius: 1821.6e3 / METER,
   widthSegments: 32,
@@ -388,7 +404,7 @@ export const IO = {
   velocity: [0, 0, (-1.75e3 * SECOND) / METER],
   sideralDay: 1.769 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 421700e3 / METER,
   eccentricity: 0.004,
   inclination: 0.05,
@@ -397,7 +413,7 @@ export const IO = {
   orbitCounterClockwise: true,
   orbitalPeriod: 1.769 * DAY,
 };
-export const TRITON = {
+export const TRITON: BodyDefinition = {
   name: "TRITON",
   radius: 1353.4e3 / METER,
   widthSegments: 32,
@@ -406,7 +422,7 @@ export const TRITON = {
   velocity: [0, 0, (0.39e3 * SECOND) / METER],
   sideralDay: 5.877 * DAY,
   orbited: "NEPTUNE",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 354759e3 / METER,
   eccentricity: 0.00002,
   inclination: 156.865,
@@ -415,7 +431,7 @@ export const TRITON = {
   orbitCounterClockwise: false,
   orbitalPeriod: 5.877 * DAY,
 };
-export const ENCELADUS = {
+export const ENCELADUS: BodyDefinition = {
   name: "ENCELADUS",
   radius: 252.1e3 / METER,
   widthSegments: 32,
@@ -424,7 +440,7 @@ export const ENCELADUS = {
   velocity: [0, 0, (-0.53e3 * SECOND) / METER],
   sideralDay: 1.37 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 238020e3 / METER,
   eccentricity: 0.0047,
   inclination: 0.009,
@@ -434,7 +450,7 @@ export const ENCELADUS = {
   orbitalPeriod: 1.37 * DAY,
 };
 
-export const TITANIA = {
+export const TITANIA: BodyDefinition = {
   name: "TITANIA",
   radius: 788.9e3 / METER,
   widthSegments: 32,
@@ -443,7 +459,7 @@ export const TITANIA = {
   velocity: [0, 0, (-0.33e3 * SECOND) / METER],
   sideralDay: 8.706 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 436300e3 / METER,
   eccentricity: 0.0011,
   inclination: 0.34,
@@ -453,7 +469,7 @@ export const TITANIA = {
   orbitalPeriod: 8.706 * DAY,
 };
 
-export const OBERON = {
+export const OBERON: BodyDefinition = {
   name: "OBERON",
   radius: 761.4e3 / METER,
   widthSegments: 32,
@@ -462,7 +478,7 @@ export const OBERON = {
   velocity: [0, 0, (-0.32e3 * SECOND) / METER],
   sideralDay: 13.463 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 583500e3 / METER,
   eccentricity: 0.0014,
   inclination: 0.068,
@@ -471,7 +487,7 @@ export const OBERON = {
   orbitCounterClockwise: true,
   orbitalPeriod: 13.463 * DAY,
 };
-export const MIRANDA = {
+export const MIRANDA: BodyDefinition = {
   name: "MIRANDA",
   radius: 235.8e3 / METER,
   widthSegments: 32,
@@ -480,7 +496,7 @@ export const MIRANDA = {
   velocity: [0, 0, (-0.38e3 * SECOND) / METER],
   sideralDay: 1.413 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 129390e3 / METER,
   eccentricity: 0.0014,
   inclination: 4.34,
@@ -489,7 +505,7 @@ export const MIRANDA = {
   orbitCounterClockwise: true,
   orbitalPeriod: 1.413 * DAY,
 };
-export const ARIEL = {
+export const ARIEL: BodyDefinition = {
   name: "ARIEL",
   radius: 578.9e3 / METER,
   widthSegments: 32,
@@ -498,7 +514,7 @@ export const ARIEL = {
   velocity: [0, 0, (-0.28e3 * SECOND) / METER],
   sideralDay: 2.52 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 191760e3 / METER,
   eccentricity: 0.0014,
   inclination: 0.28,
@@ -507,7 +523,7 @@ export const ARIEL = {
   orbitCounterClockwise: true,
   orbitalPeriod: 2.52 * DAY,
 };
-export const MIMAS = {
+export const MIMAS: BodyDefinition = {
   name: "MIMAS",
   radius: 198.2e3 / METER,
   widthSegments: 32,
@@ -516,7 +532,7 @@ export const MIMAS = {
   velocity: [0, 0, (-0.23e3 * SECOND) / METER],
   sideralDay: 0.942 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 185540e3 / METER,
   eccentricity: 0.0192,
   inclination: 1.57,
@@ -525,7 +541,7 @@ export const MIMAS = {
   orbitCounterClockwise: true,
   orbitalPeriod: 0.942 * DAY,
 };
-export const RHEA = {
+export const RHEA: BodyDefinition = {
   name: "RHEA",
   radius: 764.5e3 / METER,
   widthSegments: 32,
@@ -534,7 +550,7 @@ export const RHEA = {
   velocity: [0, 0, (-0.23e3 * SECOND) / METER],
   sideralDay: 4.518 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 527040e3 / METER,
   eccentricity: 0.0011,
   inclination: 0.35,
@@ -543,7 +559,7 @@ export const RHEA = {
   orbitCounterClockwise: true,
   orbitalPeriod: 4.518 * DAY,
 };
-export const DIONE = {
+export const DIONE: BodyDefinition = {
   name: "DIONE",
   radius: 561.4e3 / METER,
   widthSegments: 32,
@@ -552,7 +568,7 @@ export const DIONE = {
   velocity: [0, 0, (-0.22e3 * SECOND) / METER],
   sideralDay: 2.736 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 377400e3 / METER,
   eccentricity: 0.0022,
   inclination: 0.03,
@@ -562,7 +578,7 @@ export const DIONE = {
   orbitalPeriod: 2.736 * DAY,
 };
 
-export const TETHYS = {
+export const TETHYS: BodyDefinition = {
   name: "TETHYS",
   radius: 531.0e3 / METER,
   widthSegments: 32,
@@ -571,7 +587,7 @@ export const TETHYS = {
   velocity: [0, 0, (-0.22e3 * SECOND) / METER],
   sideralDay: 1.888 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 294670e3 / METER,
   eccentricity: 0.0003,
   inclination: 0.03,
@@ -580,7 +596,7 @@ export const TETHYS = {
   orbitCounterClockwise: true,
   orbitalPeriod: 1.888 * DAY,
 };
-export const IAPETUS = {
+export const IAPETUS: BodyDefinition = {
   name: "IAPETUS",
   radius: 734.5e3 / METER,
   widthSegments: 32,
@@ -589,7 +605,7 @@ export const IAPETUS = {
   velocity: [0, 0, (-0.23e3 * SECOND) / METER],
   sideralDay: 79.33 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 3561300e3 / METER,
   eccentricity: 0.028,
   inclination: 15.47,
@@ -598,7 +614,7 @@ export const IAPETUS = {
   orbitCounterClockwise: true,
   orbitalPeriod: 79.33 * DAY,
 };
-export const UBERT = {
+export const UBERT: BodyDefinition = {
   name: "UBERT",
   radius: 210.0e3 / METER,
   widthSegments: 32,
@@ -607,7 +623,7 @@ export const UBERT = {
   velocity: [0, 0, (-0.25e3 * SECOND) / METER],
   sideralDay: 0.76 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1.7e6 / METER,
   eccentricity: 0.02,
   inclination: 0.08,
@@ -617,7 +633,7 @@ export const UBERT = {
   orbitalPeriod: 0.76 * DAY,
 };
 
-export const NEREID = {
+export const NEREID: BodyDefinition = {
   name: "NEREID",
   radius: 170.0e3 / METER,
   widthSegments: 32,
@@ -626,7 +642,7 @@ export const NEREID = {
   velocity: [0, 0, (-0.52e3 * SECOND) / METER],
   sideralDay: 360.0 * DAY,
   orbited: "NEPTUNE",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 5.513e6 / METER,
   eccentricity: 0.75,
   inclination: 7.0,
@@ -636,7 +652,7 @@ export const NEREID = {
   orbitalPeriod: 360.0 * DAY,
 };
 
-export const DESPINA = {
+export const DESPINA: BodyDefinition = {
   name: "DESPINA",
   radius: 148.0e3 / METER,
   widthSegments: 32,
@@ -645,7 +661,7 @@ export const DESPINA = {
   velocity: [0, 0, (-0.47e3 * SECOND) / METER],
   sideralDay: 0.742 * DAY,
   orbited: "NEPTUNE",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 52000e3 / METER,
   eccentricity: 0.0,
   inclination: 0.5,
@@ -655,7 +671,7 @@ export const DESPINA = {
   orbitalPeriod: 0.742 * DAY,
 };
 
-export const GALATEA = {
+export const GALATEA: BodyDefinition = {
   name: "GALATEA",
   radius: 88.0e3 / METER,
   widthSegments: 32,
@@ -664,7 +680,7 @@ export const GALATEA = {
   velocity: [0, 0, (-0.59e3 * SECOND) / METER],
   sideralDay: 0.43 * DAY,
   orbited: "NEPTUNE",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 27800e3 / METER,
   eccentricity: 0.0,
   inclination: 0.0,
@@ -674,7 +690,7 @@ export const GALATEA = {
   orbitalPeriod: 0.43 * DAY,
 };
 
-export const LAOMEDIE = {
+export const LAOMEDIE: BodyDefinition = {
   name: "LAOMEDIE",
   radius: 130.0e3 / METER,
   widthSegments: 32,
@@ -683,7 +699,7 @@ export const LAOMEDIE = {
   velocity: [0, 0, (-0.23e3 * SECOND) / METER],
   sideralDay: 1.4 * DAY,
   orbited: "NEPTUNE",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1.8e6 / METER,
   eccentricity: 0.7,
   inclination: 12.2,
@@ -693,7 +709,7 @@ export const LAOMEDIE = {
   orbitalPeriod: 1.4 * DAY,
 };
 
-export const AMALTHEA = {
+export const AMALTHEA: BodyDefinition = {
   name: "AMALTHEA",
   radius: 83.5e3 / METER,
   widthSegments: 32,
@@ -702,7 +718,7 @@ export const AMALTHEA = {
   velocity: [0, 0, (-0.45e3 * SECOND) / METER],
   sideralDay: 0.498 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 181400e3 / METER,
   eccentricity: 0.001,
   inclination: 0.1,
@@ -712,7 +728,7 @@ export const AMALTHEA = {
   orbitalPeriod: 0.498 * DAY,
 };
 
-export const HIMALIA = {
+export const HIMALIA: BodyDefinition = {
   name: "HIMALIA",
   radius: 85.0e3 / METER,
   widthSegments: 32,
@@ -721,7 +737,7 @@ export const HIMALIA = {
   velocity: [0, 0, (-0.3e3 * SECOND) / METER],
   sideralDay: 5.75 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1135200e3 / METER,
   eccentricity: 0.1,
   inclination: 27.0,
@@ -731,7 +747,7 @@ export const HIMALIA = {
   orbitalPeriod: 5.75 * DAY,
 };
 
-export const PASIPHAE = {
+export const PASIPHAE: BodyDefinition = {
   name: "PASIPHAE",
   radius: 24.0e3 / METER,
   widthSegments: 32,
@@ -740,7 +756,7 @@ export const PASIPHAE = {
   velocity: [0, 0, (-0.15e3 * SECOND) / METER],
   sideralDay: 0.84 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2424700e3 / METER,
   eccentricity: 0.26,
   inclination: 144.0,
@@ -750,7 +766,7 @@ export const PASIPHAE = {
   orbitalPeriod: 0.84 * DAY,
 };
 
-export const SINOPE = {
+export const SINOPE: BodyDefinition = {
   name: "SINOPE",
   radius: 15.6e3 / METER,
   widthSegments: 32,
@@ -759,7 +775,7 @@ export const SINOPE = {
   velocity: [0, 0, (-0.09e3 * SECOND) / METER],
   sideralDay: 0.295 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2403600e3 / METER,
   eccentricity: 0.276,
   inclination: 151.0,
@@ -769,7 +785,7 @@ export const SINOPE = {
   orbitalPeriod: 0.295 * DAY,
 };
 
-export const LYSITHEA = {
+export const LYSITHEA: BodyDefinition = {
   name: "LYSITHEA",
   radius: 8.5e3 / METER,
   widthSegments: 32,
@@ -778,7 +794,7 @@ export const LYSITHEA = {
   velocity: [0, 0, (-0.24e3 * SECOND) / METER],
   sideralDay: 0.338 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1172000e3 / METER,
   eccentricity: 0.226,
   inclination: 154.0,
@@ -788,7 +804,7 @@ export const LYSITHEA = {
   orbitalPeriod: 0.338 * DAY,
 };
 
-export const CARME = {
+export const CARME: BodyDefinition = {
   name: "CARME",
   radius: 17.0e3 / METER,
   widthSegments: 32,
@@ -797,7 +813,7 @@ export const CARME = {
   velocity: [0, 0, (-0.16e3 * SECOND) / METER],
   sideralDay: 0.348 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2309000e3 / METER,
   eccentricity: 0.213,
   inclination: 164.0,
@@ -807,7 +823,7 @@ export const CARME = {
   orbitalPeriod: 0.348 * DAY,
 };
 
-export const CALLIRRHOE = {
+export const CALLIRRHOE: BodyDefinition = {
   name: "CALLIRRHOE",
   radius: 12.6e3 / METER,
   widthSegments: 32,
@@ -816,7 +832,7 @@ export const CALLIRRHOE = {
   velocity: [0, 0, (-0.2e3 * SECOND) / METER],
   sideralDay: 0.443 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2352000e3 / METER,
   eccentricity: 0.318,
   inclination: 151.0,
@@ -826,7 +842,7 @@ export const CALLIRRHOE = {
   orbitalPeriod: 0.443 * DAY,
 };
 
-export const S_2003J9 = {
+export const S_2003J9: BodyDefinition = {
   name: "S/2003J9",
   radius: 4.0e3 / METER,
   widthSegments: 32,
@@ -835,7 +851,7 @@ export const S_2003J9 = {
   velocity: [0, 0, (-0.1e3 * SECOND) / METER],
   sideralDay: 0.539 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2100000e3 / METER,
   eccentricity: 0.0,
   inclination: 163.0,
@@ -845,7 +861,7 @@ export const S_2003J9 = {
   orbitalPeriod: 0.539 * DAY,
 };
 
-export const PAAL = {
+export const PAAL: BodyDefinition = {
   name: "PAAL",
   radius: 15.0e3 / METER,
   widthSegments: 32,
@@ -854,7 +870,7 @@ export const PAAL = {
   velocity: [0, 0, (-0.17e3 * SECOND) / METER],
   sideralDay: 0.435 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2800000e3 / METER,
   eccentricity: 0.271,
   inclination: 143.0,
@@ -864,7 +880,7 @@ export const PAAL = {
   orbitalPeriod: 0.435 * DAY,
 };
 
-export const PHEROS = {
+export const PHEROS: BodyDefinition = {
   name: "PHEROS",
   radius: 22.0e3 / METER,
   widthSegments: 32,
@@ -873,7 +889,7 @@ export const PHEROS = {
   velocity: [0, 0, (-0.12e3 * SECOND) / METER],
   sideralDay: 0.825 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2872000e3 / METER,
   eccentricity: 0.349,
   inclination: 139.0,
@@ -883,7 +899,7 @@ export const PHEROS = {
   orbitalPeriod: 0.825 * DAY,
 };
 
-export const SPIRIT = {
+export const SPIRIT: BodyDefinition = {
   name: "SPIRIT",
   radius: 20.0e3 / METER,
   widthSegments: 32,
@@ -892,7 +908,7 @@ export const SPIRIT = {
   velocity: [0, 0, (-0.12e3 * SECOND) / METER],
   sideralDay: 0.5 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2383000e3 / METER,
   eccentricity: 0.254,
   inclination: 144.0,
@@ -901,7 +917,7 @@ export const SPIRIT = {
   orbitCounterClockwise: true,
   orbitalPeriod: 0.5 * DAY,
 };
-export const ANANKE = {
+export const ANANKE: BodyDefinition = {
   name: "ANANKE",
   radius: 8.0e3 / METER,
   widthSegments: 32,
@@ -910,7 +926,7 @@ export const ANANKE = {
   velocity: [0, 0, (-0.14e3 * SECOND) / METER],
   sideralDay: 0.596 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2218000e3 / METER,
   eccentricity: 0.198,
   inclination: 148.0,
@@ -921,7 +937,7 @@ export const ANANKE = {
 };
 
 // Luna 2
-export const S_2003J10 = {
+export const S_2003J10: BodyDefinition = {
   name: "S/2003J10",
   radius: 5.0e3 / METER,
   widthSegments: 32,
@@ -930,7 +946,7 @@ export const S_2003J10 = {
   velocity: [0, 0, (-0.11e3 * SECOND) / METER],
   sideralDay: 0.559 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1912000e3 / METER,
   eccentricity: 0.0,
   inclination: 145.0,
@@ -941,7 +957,7 @@ export const S_2003J10 = {
 };
 
 // Luna 3
-export const S_2003J12 = {
+export const S_2003J12: BodyDefinition = {
   name: "S/2003J12",
   radius: 6.0e3 / METER,
   widthSegments: 32,
@@ -950,7 +966,7 @@ export const S_2003J12 = {
   velocity: [0, 0, (-0.12e3 * SECOND) / METER],
   sideralDay: 0.612 * DAY,
   orbited: "JUPITER",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2089000e3 / METER,
   eccentricity: 0.062,
   inclination: 151.0,
@@ -961,7 +977,7 @@ export const S_2003J12 = {
 };
 
 // Luna 4
-export const AITNE = {
+export const AITNE: BodyDefinition = {
   name: "AITNE",
   radius: 10.3e3 / METER,
   widthSegments: 32,
@@ -970,7 +986,7 @@ export const AITNE = {
   velocity: [0, 0, (-0.18e3 * SECOND) / METER],
   sideralDay: 0.514 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2045000e3 / METER,
   eccentricity: 0.132,
   inclination: 34.0,
@@ -981,7 +997,7 @@ export const AITNE = {
 };
 
 // Luna 5
-export const PALLENE = {
+export const PALLENE: BodyDefinition = {
   name: "PALLENE",
   radius: 9.2e3 / METER,
   widthSegments: 32,
@@ -990,7 +1006,7 @@ export const PALLENE = {
   velocity: [0, 0, (-0.19e3 * SECOND) / METER],
   sideralDay: 0.669 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2076000e3 / METER,
   eccentricity: 0.0,
   inclination: 3.0,
@@ -1001,7 +1017,7 @@ export const PALLENE = {
 };
 
 // Luna 6
-export const S_2004S13 = {
+export const S_2004S13: BodyDefinition = {
   name: "S/2004S13",
   radius: 5.0e3 / METER,
   widthSegments: 32,
@@ -1010,7 +1026,7 @@ export const S_2004S13 = {
   velocity: [0, 0, (-0.1e3 * SECOND) / METER],
   sideralDay: 0.456 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1588000e3 / METER,
   eccentricity: 0.038,
   inclination: 21.0,
@@ -1021,7 +1037,7 @@ export const S_2004S13 = {
 };
 
 // Luna 7
-export const EPIOS = {
+export const EPIOS: BodyDefinition = {
   name: "EPIOS",
   radius: 7.3e3 / METER,
   widthSegments: 32,
@@ -1030,7 +1046,7 @@ export const EPIOS = {
   velocity: [0, 0, (-0.14e3 * SECOND) / METER],
   sideralDay: 0.373 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1164000e3 / METER,
   eccentricity: 0.01,
   inclination: 25.0,
@@ -1041,7 +1057,7 @@ export const EPIOS = {
 };
 
 // Luna 8
-export const PAN = {
+export const PAN: BodyDefinition = {
   name: "PAN",
   radius: 14.0e3 / METER,
   widthSegments: 32,
@@ -1050,7 +1066,7 @@ export const PAN = {
   velocity: [0, 0, (-0.14e3 * SECOND) / METER],
   sideralDay: 0.236 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1335000e3 / METER,
   eccentricity: 0.0,
   inclination: 0.0,
@@ -1066,12 +1082,12 @@ export const NBODY = {
   heightSegments: 32,
   sideralDay: MOON_SIDERAL_DAY,
   translateCounterClockWise: true,
-  canBeFocused: true,
+  canBeFocused: false,
   velocity: [1.022, 0, 0],
   mass: MOON_MASS,
 };
 
-export const HELENE = {
+export const HELENE: BodyDefinition = {
   name: "HELENE",
   radius: 17.0e3 / METER,
   widthSegments: 32,
@@ -1080,7 +1096,7 @@ export const HELENE = {
   velocity: [0, 0, (-0.12e3 * SECOND) / METER],
   sideralDay: 0.702 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 2043000e3 / METER,
   eccentricity: 0.0032,
   inclination: 27.0,
@@ -1091,7 +1107,7 @@ export const HELENE = {
 };
 
 // Luna 16
-export const BELINDA = {
+export const BELINDA: BodyDefinition = {
   name: "BELINDA",
   radius: 30.0e3 / METER,
   widthSegments: 32,
@@ -1100,7 +1116,7 @@ export const BELINDA = {
   velocity: [0, 0, (-0.1e3 * SECOND) / METER],
   sideralDay: 0.9 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1213000e3 / METER,
   eccentricity: 0.033,
   inclination: 17.0,
@@ -1111,7 +1127,7 @@ export const BELINDA = {
 };
 
 // Luna 17
-export const BIANCA = {
+export const BIANCA: BodyDefinition = {
   name: "BIANCA",
   radius: 25.0e3 / METER,
   widthSegments: 32,
@@ -1120,7 +1136,7 @@ export const BIANCA = {
   velocity: [0, 0, (-0.08e3 * SECOND) / METER],
   sideralDay: 0.867 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1001000e3 / METER,
   eccentricity: 0.045,
   inclination: 19.0,
@@ -1129,7 +1145,7 @@ export const BIANCA = {
   orbitCounterClockwise: true,
   orbitalPeriod: 0.867 * DAY,
 };
-export const CORDELIA = {
+export const CORDELIA: BodyDefinition = {
   name: "CORDELIA",
   radius: 15.0e3 / METER,
   widthSegments: 32,
@@ -1138,7 +1154,7 @@ export const CORDELIA = {
   velocity: [0, 0, (-0.2e3 * SECOND) / METER],
   sideralDay: 0.432 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 498200e3 / METER,
   eccentricity: 0.028,
   inclination: 4.5,
@@ -1149,7 +1165,7 @@ export const CORDELIA = {
 };
 
 // Luna 19
-export const OPHELIA = {
+export const OPHELIA: BodyDefinition = {
   name: "OPHELIA",
   radius: 19.0e3 / METER,
   widthSegments: 32,
@@ -1158,7 +1174,7 @@ export const OPHELIA = {
   velocity: [0, 0, (-0.17e3 * SECOND) / METER],
   sideralDay: 0.365 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 587000e3 / METER,
   eccentricity: 0.029,
   inclination: 4.2,
@@ -1169,7 +1185,7 @@ export const OPHELIA = {
 };
 
 // Luna 20
-export const JULIET = {
+export const JULIET: BodyDefinition = {
   name: "JULIET",
   radius: 19.0e3 / METER,
   widthSegments: 32,
@@ -1178,7 +1194,7 @@ export const JULIET = {
   velocity: [0, 0, (-0.12e3 * SECOND) / METER],
   sideralDay: 0.425 * DAY,
   orbited: "URANUS",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 614000e3 / METER,
   eccentricity: 0.02,
   inclination: 4.5,
@@ -1187,7 +1203,7 @@ export const JULIET = {
   orbitCounterClockwise: true,
   orbitalPeriod: 0.425 * DAY,
 };
-export const PANDORA = {
+export const PANDORA: BodyDefinition = {
   name: "PANDORA",
   radius: 41.0e3 / METER,
   widthSegments: 32,
@@ -1196,7 +1212,7 @@ export const PANDORA = {
   velocity: [0, 0, (-0.24e3 * SECOND) / METER],
   sideralDay: 0.982 * DAY,
   orbited: "SATURN",
-  canBeFocused: true,
+  canBeFocused: false,
   semimajorAxis: 1420000e3 / METER,
   eccentricity: 0.01,
   inclination: 4.4,

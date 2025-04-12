@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Body } from "../shapes";
+import { Body } from "../shapes/Body";
 import { TextureRouteType } from "../constants/textures";
 
 export class TexturesService {

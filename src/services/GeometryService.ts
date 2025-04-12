@@ -1,6 +1,11 @@
 import * as THREE from "three";
-import { Body, Container } from "../shapes";
-
+import { Container } from "../shapes/Container";
+export type BoxProperties = {
+  object3D: Container;
+  width: number;
+  height: number;
+  depth: number;
+};
 export class GeometryService {
   static instance: GeometryService;
 
@@ -21,12 +26,8 @@ export class GeometryService {
     return size;
   }
 
-  updateBoxSize(
-    object3D: Container,
-    width: number,
-    height: number,
-    depth: number
-  ) {
+  updateBoxSize(boxProperties: BoxProperties) {
+    const { object3D, width, height, depth } = boxProperties;
     const newGeometry = new THREE.BoxGeometry(width, height, depth);
 
     if (object3D.geometry) {
