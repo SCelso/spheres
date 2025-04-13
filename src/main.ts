@@ -58,14 +58,18 @@ async function init() {
   const moons = createBodyMeshes(Constants.MOONS_DEFINITION, planets);
   const bodies = [sun, ...planets, ...moons];
   const allMeshes = [...bodies, earthClouds];
+  let bodiesAdded: Body[] = [];
+  let trailBodiesAdded: THREE.Line[] = [];
 
   const earth = allMeshes.filter((mesh) => mesh.name === "EARTH")[0];
-  const bodiesWithGravity = [sun, ...planets];
+  let bodiesWithGravity = [sun, ...planets, ...bodiesAdded];
   const bodiesWithoutGravity = [...bodiesWithGravity, ...moons];
   const cameraTargets = allMeshes.filter((mesh) => mesh.canBeFocused);
   const allOrbits = bodies.map((body) => body.getOrbitLine());
   const allTrails = bodies.map((body) => body.getTrailLine());
-  const gravityTrails = bodies.map((body) => body.getGravityTrailLine());
+  let gravityTrails = bodiesWithGravity.map((body) =>
+    body.getGravityTrailLine()
+  );
 
   //TEXTURES
   await initializeTextures();
@@ -158,9 +162,22 @@ async function init() {
   }
 
   function initGravity() {
+    const currentTarget = cameraService.getContainer().getCurrentTarget();
     scene.remove(...moons, ...allOrbits, ...allTrails);
     scene.add(...gravityTrails);
     timeScale.scale = 1;
+
+    let changeCameraPlanet = "";
+
+    if (planets.includes(currentTarget)) {
+      changeCameraPlanet = currentTarget.name;
+    } else if (currentTarget.getOrbited()) {
+      changeCameraPlanet = currentTarget.getOrbited()!.name;
+    } else {
+      changeCameraPlanet = "sun";
+    }
+
+    cameraService.changeCamera(changeCameraPlanet);
     hudController.setSlider(1);
     bodiesWithGravity.forEach((body) => {
       body.resetPosition();
@@ -185,11 +202,30 @@ async function init() {
         deltaTime * timeScale.scale,
         timeScale.scale
       );
-      updateTrailDots(planets);
+      updateTrailDots(bodiesWithGravity);
     } else {
       if (!firstIterationGravity) {
         scene.add(...moons, ...allOrbits, ...allTrails);
-        scene.remove(...gravityTrails);
+        scene.remove(...gravityTrails, ...bodiesAdded, ...trailBodiesAdded);
+        const currentTarget = cameraService.getContainer().getCurrentTarget();
+        let changeCameraPlanet = "";
+
+        if (planets.includes(currentTarget)) {
+          changeCameraPlanet = currentTarget.name;
+        } else {
+          changeCameraPlanet = "sun";
+        }
+
+        cameraService.changeCamera(changeCameraPlanet);
+        bodiesWithGravity = bodiesWithGravity.filter(
+          (body) => !bodiesAdded.includes(body)
+        );
+
+        gravityTrails = gravityTrails.filter(
+          (trail) => !trailBodiesAdded.includes(trail)
+        );
+        trailBodiesAdded = [];
+        bodiesAdded = [];
         firstIterationGravity = true;
       }
 
@@ -213,7 +249,7 @@ async function init() {
       deltaTime * timeScale.scale
     );
 
-    //      cameraService.updateCameraMovement();
+    // cameraService.updateCameraMovement();
 
     cameraService.orbitControls.update();
     camera.lookAt(container.position);
@@ -382,40 +418,79 @@ async function init() {
       body.rotation.y += newRotationAngle;
     });
   }
+
+  window.addEventListener(
+    "dblclick",
+    (event) => {
+      if (!gravity.gravityFlag) return;
+      createBodyAtPointer(event);
+    },
+    false
+  );
+
+  function createBodyAtPointer(event: any) {
+    const planetTarget = cameraService.getContainer().getCurrentTarget();
+    const mouse = new THREE.Vector2();
+    const raycaster = new THREE.Raycaster();
+    const name = "NBODY" + Math.random();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
+    cameraDirection.normalize();
+
+    // Esta es la normal del plano
+    console.log(cameraDirection);
+    const planePoint = planetTarget.position;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const plane = new THREE.Plane();
+    plane
+      .setFromNormalAndCoplanarPoint(cameraDirection, planePoint)
+      .normalize();
+
+    const speed = 0.00001; // Puedes ajustar esto como te convenga
+    const extraVelocity = cameraDirection.clone().multiplyScalar(speed);
+
+    const intersection = new THREE.Vector3();
+    console.log(planetTarget.trailColor);
+    raycaster.ray.intersectPlane(plane, intersection);
+    const newBody = new Body({
+      name: name,
+      radius: Constants.MOON_SIZE,
+      widthSegments: 32,
+      heightSegments: 32,
+      sideralDay: Constants.MOON_SIDERAL_DAY,
+      canBeFocused: false,
+      velocity: [
+        planetTarget.getVelocity().x + extraVelocity.x,
+        planetTarget.getVelocity().y + extraVelocity.y,
+        planetTarget.getVelocity().z + extraVelocity.z,
+      ],
+      trailColor: [
+        1 - planetTarget.trailColor[0],
+        1 - planetTarget.trailColor[1],
+        1 - planetTarget.trailColor[2],
+      ],
+      mass: Constants.MOON_MASS,
+      position: [intersection.x, intersection.y, intersection.z],
+    });
+    newBody.setOrbited(planetTarget);
+    cameraService.bodiesTarget.push(newBody);
+
+    bodiesAdded.push(newBody);
+    bodiesWithGravity.push(newBody);
+    console.log(newBody.getGravityTrailLine());
+    scene.add(...bodiesAdded);
+    trailBodiesAdded.push(newBody.getGravityTrailLine());
+    gravityTrails.push(newBody.getGravityTrailLine());
+    scene.add(newBody.getGravityTrailLine());
+    console.log(scene.children);
+  }
 }
 
 init();
-
-// window.addEventListener("click", (event) => createBodyAtPointer(event), false);
-// function createBodyAtPointer(event) {
-//   const mouse = new THREE.Vector2();
-//   const raycaster = new THREE.Raycaster();
-
-//   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-//   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-//   raycaster.setFromCamera(mouse, camera);
-
-//   const plane = new THREE.Plane(new THREE.Vector3(0, 0.5, 0), 0);
-//   const intersection = new THREE.Vector3();
-//   raycaster.ray.intersectPlane(plane, intersection);
-
-//   const newBody = new Body({
-//     name: "newBody",
-//     radius: Constants.MOON_SIZE,
-//     widthSegments: 32,
-//     heightSegments: 32,
-//     mass: Constants.MOON_MASS,
-//     velocity: [0, 0, 0],
-//     position: [intersection.x, intersection.y, intersection.z],
-//   });
-
-//   scene.add(newBody);
-//   bodies.push(newBody);
-//   planetWorkerService.addBody(newBody);
-//   newBody.printLine();
-//   scene.add(newBody.getTrailLine());
-// }
 
 //async function initializePerihelion(planets) {
 //   const perihelionWorkerPool = new WorkerPool(

@@ -15,8 +15,13 @@
 			<input type="range" min="-100" max="100" step="0.1" value="1" class="slider" id="myRange">
 		</div>
 
-		<div id="planetButtons" >
-
+		
+		<button class="hud-button gravityButton" >🌀</button>
+		<button class="hud-button orbitButton"  >💫</button>
+		<div class="menu-container menu-planets">
+			<input type="checkbox" id="planets-toggle">
+			<label for="planets-toggle" class="menu-button hud-button">
+				<div class="menu-options">
 					<button>Sun</button>
 			
 					<button>Mercury</button>
@@ -24,8 +29,6 @@
 					<button>Venus</button>
 				
 					<button>Earth</button>
-				
-					<button>Moon</button>
 				
 					<button>Mars</button>
 				
@@ -36,10 +39,21 @@
 					<button>Uranus</button>
 				
 					<button>Neptune</button>
-			
+				</div>
+				<span class="toggle-icon">🪐</span>
+			</label>
 		</div>
-		<button id="gravityButton">Gravity ⚠</button>
-		<button id="orbits" >Orbits</button>
-		<button id="hideHUD" >👁</button>
+
+		<div class="menu-container menu-moons">
+			<input type="checkbox" id="moons-toggle">
+			<label for="moons-toggle" class="menu-button hud-button">
+				<div class="menu-options">
+					<button>Moon</button>
+			
+				</div>
+				<span class="toggle-icon">🌒</span>
+			</label>
+		</div>
+		<button class="hud-button hide-hud-button" >👀</button>
 	</body>
 </html>

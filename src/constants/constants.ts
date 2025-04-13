@@ -10,7 +10,7 @@ export const METER = 1 / SCALE;
 export const KILOMETER = 1000 * METER;
 
 export const G = (6.7384e-11 * SECOND ** 2) / METER ** 3;
-export const smoothing = 0;
+export const smoothing = 1e-4;
 export const AU = 1.496e11;
 
 export const EARTH_SIZE = 6378e3 / METER;
@@ -1076,7 +1076,7 @@ export const PAN: BodyDefinition = {
   orbitalPeriod: 0.236 * DAY,
 };
 export const NBODY = {
-  name: "nbody",
+  name: "NBODY",
   radius: MOON_SIZE,
   widthSegments: 32,
   heightSegments: 32,
@@ -1084,7 +1084,8 @@ export const NBODY = {
   translateCounterClockWise: true,
   canBeFocused: false,
   velocity: [1.022, 0, 0],
-  mass: MOON_MASS,
+  // position: [0, 0.5, 0.5],
+  mass: 0,
 };
 
 export const HELENE: BodyDefinition = {

@@ -82,6 +82,7 @@ export class Body extends THREE.Mesh<
       trailColor,
       orbitalPeriod,
       orbitCounterClockwise: orbitCounterClockwise,
+      position,
     } = body;
 
     material = material ?? new THREE.MeshStandardMaterial({ color: 0xffffff });
@@ -96,6 +97,9 @@ export class Body extends THREE.Mesh<
     this.canBeFocused = canBeFocused;
 
     this.mass = mass ?? 0;
+    this.position.copy(
+      position ? new THREE.Vector3(...position) : new THREE.Vector3(0, 0, 0)
+    );
     this.velocity = velocity
       ? new THREE.Vector3(...velocity)
       : new THREE.Vector3(0, 0, 0);
@@ -159,7 +163,7 @@ export class Body extends THREE.Mesh<
     return this.trailLineGravity;
   }
 
-  private initializeTrailLine() {
+  public initializeTrailLine() {
     const geometry = new THREE.BufferGeometry().setFromPoints(
       this.trailDotsGlobal
     );
@@ -206,18 +210,27 @@ export class Body extends THREE.Mesh<
   }
 
   public updateTrailDots() {
-    if (!this.orbited) return;
+    if (
+      this.orbited &&
+      Math.abs(this.orbited.position.distanceTo(this.position)) < 10
+    ) {
+      const relativePosition = this.position.clone().sub(this.orbited.position);
 
-    const relativePosition = this.position.clone().sub(this.orbited.position);
+      if (this.trailDotsRelative.length >= 100) {
+        this.trailDotsRelative.shift();
+      }
+      this.trailDotsRelative.push(relativePosition);
 
-    if (this.trailDotsRelative.length >= 100) {
-      this.trailDotsRelative.shift();
+      this.trailDotsGlobal = this.trailDotsRelative.map((relPos) =>
+        relPos.clone().add(this.orbited!.position)
+      );
+    } else {
+      this.trailDotsRelative = [];
+      if (this.trailDotsGlobal.length >= 100) {
+        this.trailDotsGlobal.shift();
+      }
+      this.trailDotsGlobal.push(this.position.clone());
     }
-    this.trailDotsRelative.push(relativePosition);
-
-    this.trailDotsGlobal = this.trailDotsRelative.map((relPos) =>
-      relPos.clone().add(this.orbited!.position)
-    );
   }
 
   public initializePerihelionPosition() {

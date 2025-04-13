@@ -10,12 +10,13 @@ export class HUDController {
   sliderNumber = $("#sliderNumber");
 
   isHUDHide = false;
-  hideHUD = $("#hideHUD");
+  hideHUD = $(".hide-hud-button");
   velocityNumber = $("#velocity");
-  planetsButtons = $("#planetButtons");
-  gravityButton = $("#gravityButton");
+  planetsButtons = $(".menu-planets");
+  moonsButtons = $(".menu-moons");
+  gravityButton = $(".gravityButton");
 
-  orbitsButton = $("#orbits");
+  orbitsButton = $(".orbitButton");
   timeScale;
   bodies: Body[];
   constructor(
@@ -27,34 +28,75 @@ export class HUDController {
     this.bodies = bodies;
     this.timeScale = timeScale;
     this.cameraService = CameraService.getInstance([]);
-    this.initializeButtonPlanets();
+    this.initializeButtonPlanets(gravity);
     this.initilizeHideButton();
-    this.initializeOrbitsButton(obitsVisible);
+    this.initializeOrbitsButton(obitsVisible, gravity);
     this.initializeSlider();
-    this.initializeGravityButton(gravity);
+    this.initializeGravityButton(gravity, obitsVisible);
   }
 
-  initializeOrbitsButton(orbitsVisible: { visible: boolean }) {
+  initializeOrbitsButton(
+    orbitsVisible: { visible: boolean },
+    gravity: { gravityFlag: boolean }
+  ) {
     if (!this.orbitsButton) return;
 
     this.orbitsButton.addEventListener("click", () => {
+      if (gravity.gravityFlag) return;
       orbitsVisible.visible = !orbitsVisible.visible;
+      if (orbitsVisible.visible && !gravity.gravityFlag) {
+        this.orbitsButton!.style.opacity = "1";
+      } else {
+        this.orbitsButton!.style.opacity = "0.2";
+      }
     });
   }
 
-  initializeGravityButton(gravity: { gravityFlag: boolean }) {
+  initializeGravityButton(
+    gravity: { gravityFlag: boolean },
+    orbitsVisible: { visible: boolean }
+  ) {
     if (!this.gravityButton) {
       return;
     }
 
     this.gravityButton.addEventListener("click", () => {
       gravity.gravityFlag = !gravity.gravityFlag;
+      if (gravity.gravityFlag) {
+        this.orbitsButton!.style.opacity = "0.2";
+        this.moonsButtons!.style.opacity = "0.2";
+        this.gravityButton!.style.opacity = "1";
+
+        this.orbitsButton!.innerHTML = "🔒";
+      } else {
+        if (orbitsVisible.visible) {
+          this.orbitsButton!.style.opacity = "1";
+        } else {
+          this.orbitsButton!.style.opacity = "0.2";
+        }
+        this.moonsButtons!.style.opacity = "1";
+
+        this.gravityButton!.style.opacity = "0.2";
+
+        this.orbitsButton!.innerHTML = "💫";
+      }
     });
   }
-  initializeButtonPlanets() {
-    if (!this.planetsButtons) return;
-    this.planetsButtons.addEventListener("click", (event) => {
+  initializeButtonPlanets(gravity: { gravityFlag: boolean }) {
+    if (!this.planetsButtons && !this.moonsButtons) return;
+    this.planetsButtons!.addEventListener("click", (event) => {
       if (!event.target) return;
+      const target = event.target as HTMLElement;
+
+      if (target.matches("button")) {
+        this.cameraService.changeCamera(target.innerHTML);
+        console.log(target.innerHTML);
+      }
+    });
+
+    this.moonsButtons!.addEventListener("click", (event) => {
+      if (!event.target) return;
+      if (gravity.gravityFlag) return;
       const target = event.target as HTMLElement;
 
       if (target.matches("button")) {
@@ -100,29 +142,37 @@ export class HUDController {
       !this.slider ||
       !this.sliderNumber ||
       !this.orbitsButton ||
-      !this.gravityButton
+      !this.gravityButton ||
+      !this.planetsButtons ||
+      !this.moonsButtons
     ) {
       return;
     }
 
     this.hideHUD.addEventListener("click", () => {
       let visibility;
+      let opacity;
       if (this.isHUDHide) {
         visibility = "visible";
+        opacity = "1";
+        this.hideHUD!.style.opacity = opacity;
         this.isHUDHide = false;
-        this.hideHUD!.style.opacity = "1";
       } else {
         visibility = "hidden";
-        this.isHUDHide = true;
+        opacity = "0";
         this.hideHUD!.style.opacity = "0.2";
+        this.isHUDHide = true;
       }
 
-      Array.from(this.planetsButtons!.children).forEach((button) => {
-        if (button instanceof HTMLElement) {
-          button.style.visibility = visibility;
-        }
-      });
+      this.planetsButtons!.style.opacity = opacity;
+      this.moonsButtons!.style.opacity = opacity;
+      this.orbitsButton!.style.opacity = opacity;
+      this.slider!.style.opacity = opacity;
+      this.sliderNumber!.style.opacity = opacity;
+      this.gravityButton!.style.opacity = opacity;
 
+      this.planetsButtons!.style.visibility = visibility;
+      this.moonsButtons!.style.visibility = visibility;
       this.orbitsButton!.style.visibility = visibility;
       this.slider!.style.visibility = visibility;
       this.sliderNumber!.style.visibility = visibility;
