@@ -6,17 +6,17 @@ import { $ } from "../utils/domSelector";
 export class HUDController {
   cameraService;
 
-  slider = $("#myRange") as HTMLInputElement;
-  sliderNumber = $("#sliderNumber");
+  slider = $("#scale-range") as HTMLInputElement;
+  sliderNumber = $("#slider-number");
 
   isHUDHide = false;
   hideHUD = $(".hide-hud-button");
   velocityNumber = $("#velocity");
   planetsButtons = $(".menu-planets");
   moonsButtons = $(".menu-moons");
-  gravityButton = $(".gravityButton");
+  gravityButton = $(".gravity-button");
 
-  orbitsButton = $(".orbitButton");
+  orbitsButton = $(".orbits-button");
   timeScale;
   bodies: Body[];
   constructor(

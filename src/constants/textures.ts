@@ -47,7 +47,7 @@ export const texturesRouteMap: TexturesRouteMapType = {
 };
 
 export type TexturesRouteMapType = {
-  [x in keyof typeof NamePlanets]: TextureRouteType;
+  [x in keyof typeof NamePlanets & NameMoons]: TextureRouteType;
 };
 
 export type TextureRouteType = {
@@ -71,11 +71,10 @@ export enum NamePlanets {
   SATURN,
   URANUS,
   NEPTUNE,
+}
+
+export enum NameMoons {
   MOON,
-  EARTHCLOUDS,
-  PHOBOS,
-  TITAN,
-  DEIMOS,
 }
 
 export const BACKGROUND_TEXTURE_ROUTE = "/textures/backgroundTexture.png";

@@ -96,18 +96,18 @@ button {
   transform-origin: right center;
 }
 
-.gravityButton{
+.gravity-button{
   right: 50px;
   top: 32%;  
   opacity: 0.2;
 }
 
-.orbitButton{
+.orbits-button{
   right: 50px;
   top: 40%;  
 }
 
-#sliderNumber{
+#slider-number{
   position: fixed;
   display: flex;
   justify-content: center;
@@ -270,7 +270,7 @@ button {
     
   }
 
-  #sliderNumber{
+  #slider-number{
    
  font-size: xx-large;
  height: 10%;

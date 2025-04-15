@@ -11,6 +11,7 @@ import * as THREE from "three";
 import { HUDController } from "./controllers/HUDController";
 import { WorkerPool } from "./services/WorkerPool";
 import { Body } from "./shapes/Body.js";
+import { CreateDOMContent } from "./services/CreateDOMContent";
 
 export type PlanetData = {
   name: string;
@@ -25,6 +26,7 @@ type MeshWithTextures = {
   texturesRoute: TexturesRoutes.TextureRouteType;
 };
 async function init() {
+  new CreateDOMContent();
   const workerPoolSize = 4;
 
   const calculateNewPositions = new WorkerPool<[PlanetData]>(
@@ -134,7 +136,8 @@ async function init() {
         mesh,
         texturesRoute:
           TexturesRoutes.texturesRouteMap[
-            mesh.name as keyof typeof TexturesRoutes.NamePlanets
+            mesh.name as keyof typeof TexturesRoutes.NamePlanets &
+              TexturesRoutes.NameMoons
           ],
       };
     });
@@ -450,7 +453,7 @@ async function init() {
       .setFromNormalAndCoplanarPoint(cameraDirection, planePoint)
       .normalize();
 
-    const speed = 0.00001; // Puedes ajustar esto como te convenga
+    const speed = 0.0002; // Puedes ajustar esto como te convenga
     const extraVelocity = cameraDirection.clone().multiplyScalar(speed);
 
     const intersection = new THREE.Vector3();
